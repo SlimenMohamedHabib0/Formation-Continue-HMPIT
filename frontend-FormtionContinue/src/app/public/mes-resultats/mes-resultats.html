@@ -1,0 +1,69 @@
+<div *ngIf="loading" class="text-center py-6">
+    <div class="spinner-border text-primary"></div>
+  </div>
+  
+  <div *ngIf="!loading" class="page-body results-wrap">
+    <div class="page-header mb-4">
+      <div>
+        <div class="page-title">Mes résultats</div>
+        <div class="page-subtitle">Historique de vos tentatives QCM</div>
+      </div>
+  
+      <div class="filters">
+        <input
+          class="form-control search-box"
+          placeholder="Rechercher par cours..."
+          [(ngModel)]="search"
+          (ngModelChange)="onSearchChange()"
+        />
+  
+        <select class="form-select status-box" [(ngModel)]="statut" (change)="onFilterChange()">
+          <option value="">Tous</option>
+          <option value="ECHOUE">Échoués</option>
+          <option value="REUSSI">Réussis</option>
+        </select>
+      </div>
+    </div>
+  
+    <div *ngIf="error" class="alert alert-danger">{{ error }}</div>
+  
+    <div class="card">
+      <div class="table-responsive">
+        <table class="table table-vcenter card-table table-clean">
+          <thead>
+            <tr>
+              <th>Cours</th>
+              <th class="text-center" style="width: 110px;">Note</th>
+              <th class="text-center" style="width: 130px;">Statut</th>
+              <th class="text-end" style="width: 210px;">Date</th>
+            </tr>
+          </thead>
+  
+          <tbody>
+            <tr *ngIf="!view?.length">
+              <td colspan="4" class="text-secondary px-4 py-4">Aucun résultat.</td>
+            </tr>
+  
+            <tr *ngFor="let a of view" class="row-hover">
+              <td class="fw-semibold">
+                <span class="name-cell">{{ a.courseTitre }}</span>
+              </td>
+  
+              <td class="text-center fw-bold">{{ a.noteSur20 }}</td>
+  
+              <td class="text-center">
+                <span class="badge" [ngClass]="badgeClass(a.statutTentative)">
+                  {{ labelStatus(a.statutTentative) }}
+                </span>
+              </td>
+  
+              <td class="text-end text-secondary">
+                {{ formatDate(a.dateTentative) }}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  

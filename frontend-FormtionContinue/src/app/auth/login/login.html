@@ -1,0 +1,63 @@
+<div class="page page-center">
+  <div class="container container-tight py-4">
+
+    <div class="auth-top text-center mb-4">
+      <img src="/hmpit.png" alt="HMPIT" class="auth-logo" />
+      <div class="auth-brand-title">
+        Hopital Militaire Principal d'Instruction de Tunis
+      </div>
+      <div class="auth-welcome">
+        Plateforme de Formation Continue
+      </div>
+    </div>
+
+    <div class="card card-md auth-card">
+      <div class="card-body">
+        <h2 class="h2 text-center mb-4">Connexion</h2>
+
+        <div *ngIf="error" class="alert alert-danger">
+          {{ error }}
+        </div>
+
+        <form (ngSubmit)="submit()">
+          <div class="mb-3">
+            <label class="form-label">Email</label>
+            <input
+              type="email"
+              class="form-control"
+              name="email"
+              [(ngModel)]="model.email"
+              autocomplete="username"
+              required
+            />
+          </div>
+
+          <div class="mb-2">
+            <label class="form-label">Mot de passe</label>
+            <input
+              type="password"
+              class="form-control"
+              name="password"
+              [(ngModel)]="model.password"
+              autocomplete="current-password"
+              required
+            />
+          </div>
+
+          <div class="form-footer mt-4">
+            <button class="btn btn-primary w-100" type="submit" [disabled]="loading">
+              <span *ngIf="!loading">Connexion</span>
+              <span *ngIf="loading">Connexion...</span>
+            </button>
+          </div>
+        </form>
+
+        <div class="text-center text-secondary mt-4">
+          <span>Vous n’avez pas de compte ?</span>
+          <a class="ms-1" routerLink="/auth/register">Créer un compte</a>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>

@@ -1,0 +1,115 @@
+<div class="prof-inscriptions">
+    <div class="page-header mb-3">
+      <h2 class="page-title">Inscriptions aux cours</h2>
+    </div>
+  
+    <div class="card mb-3">
+      <div class="card-body d-flex gap-2">
+        <input
+          class="form-control search-box"
+          placeholder="Rechercher par cours, nom ou email"
+          [(ngModel)]="search"
+          (ngModelChange)="load()"
+        />
+  
+        <select
+          class="form-select status-box"
+          [(ngModel)]="statut"
+          (change)="load()"
+        >
+          <option value="">Tous</option>
+          <option value="PENDING">En attente</option>
+          <option value="REFUSEE">Refusée</option>
+          <option value="ACCEPTEE">Acceptée</option>
+        </select>
+      </div>
+    </div>
+  
+    <div *ngIf="loading" class="text-muted">Chargement…</div>
+    <div *ngIf="error" class="alert alert-danger">{{ error }}</div>
+  
+    <div class="card" *ngIf="!loading">
+      <div class="table-responsive">
+        <table class="table table-vcenter table-clean">
+          <thead>
+            <tr>
+              <th>Cours</th>
+              <th>Utilisateur</th>
+              <th>Email</th>
+              <th>Statut</th>
+              <th class="text-end">Action</th>
+            </tr>
+          </thead>
+  
+          <tbody>
+            <tr
+              *ngFor="let r of rows"
+              class="row-hover"
+            >
+              <td>
+                <span class="name-cell">{{ r.courseTitre }}</span>
+              </td>
+  
+              <td>
+                <span class="name-cell">{{ r.userFullName }}</span>
+              </td>
+  
+              <td>
+                <span class="text-truncate">{{ r.userEmail }}</span>
+              </td>
+  
+              <td>
+                <span
+                  class="badge bg-orange-lt"
+                  *ngIf="r.statut === 'PENDING'"
+                >
+                  En attente
+                </span>
+  
+                <span
+                  class="badge bg-red-lt"
+                  *ngIf="r.statut === 'REFUSEE'"
+                >
+                  Refusée
+                </span>
+  
+                <span
+                  class="badge bg-green-lt"
+                  *ngIf="r.statut === 'ACCEPTEE'"
+                >
+                  Acceptée
+                </span>
+              </td>
+  
+              <td class="text-end">
+                <ng-container *ngIf="r.statut === 'PENDING'">
+                  <button
+                    class="btn btn-sm btn-success me-1"
+                    [disabled]="rowLoading[r.id]"
+                    (click)="accept(r.id)"
+                  >
+                    Accepter
+                  </button>
+  
+                  <button
+                    class="btn btn-sm btn-danger"
+                    [disabled]="rowLoading[r.id]"
+                    (click)="refuse(r.id)"
+                  >
+                    Refuser
+                  </button>
+                </ng-container>
+              </td>
+            </tr>
+  
+            <tr *ngIf="rows.length === 0">
+              <td colspan="5" class="text-center text-muted">
+                Aucune inscription trouvée.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  

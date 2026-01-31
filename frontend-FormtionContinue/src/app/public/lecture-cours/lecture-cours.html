@@ -1,0 +1,69 @@
+<div *ngIf="loading" class="text-center py-6">
+    <div class="spinner-border text-primary"></div>
+  </div>
+  
+  <div *ngIf="!loading && error" class="alert alert-danger">
+    {{ error }}
+  </div>
+  
+  <div *ngIf="!loading && success" class="alert alert-success">
+    {{ success }}
+  </div>
+  
+  <div *ngIf="!loading && !error" class="page-body lecture-wrap">
+    <div class="page-header mb-4">
+      <div>
+        <div class="page-title">Lecture du cours</div>
+        <div class="page-subtitle">
+          Lisez le document, puis cliquez sur “J’ai terminé le cours”.
+        </div>
+      </div>
+  
+      <div class="d-flex gap-2">
+        <button class="btn btn-outline-secondary" (click)="back()">
+          Retour
+        </button>
+  
+        <button
+          class="btn btn-success"
+          [disabled]="saving || completed"
+          (click)="finish()"
+        >
+          J’ai terminé le cours
+        </button>
+  
+        <button
+          class="btn btn-primary"
+          [disabled]="!completed"
+          (click)="goTest()"
+        >
+          Passer le test
+        </button>
+      </div>
+    </div>
+  
+    <div class="row row-cards">
+      <div class="col-12">
+        <div id="pdf-section" class="card pdf-card">
+            <div class="card-header">
+              <div class="d-flex align-items-center justify-content-between w-100">
+                <div class="card-title">Document PDF</div>
+                <span class="badge" [class.bg-green-lt]="completed" [class.bg-yellow-lt]="!completed">
+                  {{ completed ? 'Terminé' : 'À lire' }}
+                </span>
+              </div>
+            </div>
+          
+            <div class="card-body">
+              <div *ngIf="!pdfUrl" class="text-secondary p-2">PDF introuvable.</div>
+          
+              <div *ngIf="pdfUrl" class="pdf-frame-wrap">
+                <iframe class="pdf-frame" [src]="pdfUrl"></iframe>
+              </div>
+            </div>
+          </div>
+          
+      </div>
+    </div>
+  </div>
+  

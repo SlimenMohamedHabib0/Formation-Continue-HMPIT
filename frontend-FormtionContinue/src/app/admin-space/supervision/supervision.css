@@ -1,0 +1,85 @@
+.admin-supervision {
+    padding: 0 12px;
+  }
+  
+  .page-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+  }
+  
+  .page-title {
+    font-size: 26px;
+    font-weight: 900;
+    color: #0f172a;
+  }
+  
+  .search-box {
+    min-width: 360px;
+  }
+  
+  .cat-search-box {
+    min-width: 260px;
+  }
+  
+  .cat-box {
+    min-width: 260px;
+  }
+  
+  .status-box {
+    min-width: 220px;
+  }
+  
+  .table-clean thead th,
+  .table th {
+    font-size: 12px;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #64748b;
+    white-space: nowrap;
+  }
+  
+  .table-clean td,
+  .table td {
+    font-size: 15px;
+  }
+  
+  .table-responsive {
+    overflow-x: hidden;
+    overflow-y: hidden;
+  }
+  
+  .card {
+    overflow: hidden;
+  }
+  
+  .name-cell {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
+  .text-truncate {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
+  .row-hover:hover td {
+    background: rgba(12, 166, 120, 0.08);
+  }
+  
+  .table-clean tbody tr {
+    transition: transform 120ms ease, background-color 120ms ease;
+    transform-origin: center;
+  }
+  
+  .table-clean tbody tr:hover {
+    transform: scale(1.01);
+  }
+  

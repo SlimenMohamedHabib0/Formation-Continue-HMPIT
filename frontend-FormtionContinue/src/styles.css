@@ -1,0 +1,92 @@
+:root{
+    --tblr-primary: #0ca678;
+    --tblr-primary-rgb: 12, 166, 120;
+  
+    --bs-primary: #0ca678;
+    --bs-primary-rgb: 12, 166, 120;
+  }
+  
+  a {
+    color: var(--tblr-primary);
+  }
+  a:hover {
+    opacity: .85;
+  }
+  
+  html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+    background: transparent;
+  }
+  
+  app-root {
+    display: block;
+    min-height: 100vh;
+  }
+  
+  .page.page-center {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+  }
+  
+  .page.page-center > .container .text-center h1 {
+    color: #f8fafc !important;
+  }
+  
+  .page.page-center > .container .text-center .text-secondary {
+    color: rgba(248, 250, 252, 0.85) !important;
+  }
+  
+  .card {
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
+  }
+  
+  .app-bg {
+    min-height: 100vh;
+    background-image: url('/hopital.jpg');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    position: relative;
+    width: 100vw;
+  }
+  
+  .app-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.45);
+    backdrop-filter: blur(5px);
+    z-index: 0;
+  }
+  
+  .app-content {
+    position: relative;
+    z-index: 1;
+    min-height: 100vh;
+  }
+  
+  .app-card {
+    background-color: rgba(248, 250, 252, 0.473);
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+    border-color: rgba(248, 250, 252, 0.35);
+  }
+  
+  html,
+body {
+  height: 100%;
+}
+
+body {
+  overflow-y: auto;
+  scrollbar-width: none;      /* Firefox */
+  -ms-overflow-style: none;   /* IE/Edge legacy */
+}
+
+body::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}

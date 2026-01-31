@@ -1,0 +1,144 @@
+<div *ngIf="loading" class="text-center py-6">
+    <div class="spinner-border text-primary"></div>
+  </div>
+  
+  <div *ngIf="data" class="page-body dashboard-wrap">
+    <div class="dashboard-header mb-4">
+      <div class="page-title">Mon tableau de bord</div>
+      <div class="dashboard-subtitle">
+        Vue globale de ma progression et de mes résultats
+      </div>
+    </div>
+    <div class="kpi-grid mb-4">
+      <div class="card dashboard-kpi" routerLink="/public/mes-inscriptions">
+        <div class="card-body">
+          <div class="kpi-top">
+            <div class="kpi-label">Cours inscrits</div>
+            <span class="badge bg-primary-lt">TOTAL</span>
+          </div>
+          <div class="kpi-value">{{ data.nbCoursesEnrolled }}</div>
+        </div>
+      </div>
+  
+      <div class="card dashboard-kpi" routerLink="/public/mes-inscriptions" [queryParams]="{ statut: 'PENDING' }">
+        <div class="card-body">
+          <div class="kpi-top">
+            <div class="kpi-label">En attente</div>
+            <span class="badge bg-yellow-lt">PENDING</span>
+          </div>
+          <div class="kpi-value">{{ data.nbCoursesPending }}</div>
+        </div>
+      </div>
+  
+      <div class="card dashboard-kpi" routerLink="/public/mes-inscriptions" [queryParams]="{ statut: 'ACCEPTEE' }">
+        <div class="card-body">
+          <div class="kpi-top">
+            <div class="kpi-label">Acceptées</div>
+            <span class="badge bg-green-lt">OK</span>
+          </div>
+          <div class="kpi-value">{{ data.nbCoursesAccepted }}</div>
+        </div>
+      </div>
+  
+      <div class="card dashboard-kpi" routerLink="/public/mes-inscriptions" [queryParams]="{ statut: 'REFUSEE' }">
+        <div class="card-body">
+          <div class="kpi-top">
+            <div class="kpi-label">Refusées</div>
+            <span class="badge bg-red-lt">NO</span>
+          </div>
+          <div class="kpi-value">{{ data.nbCoursesRefused }}</div>
+        </div>
+      </div>
+  
+      <div class="card dashboard-kpi" routerLink="/public/mes-resultats">
+        <div class="card-body">
+          <div class="kpi-top">
+            <div class="kpi-label">Cours complétés</div>
+            <span class="badge bg-green-lt">DONE</span>
+          </div>
+          <div class="kpi-value">{{ data.nbCoursesCompleted }}</div>
+        </div>
+      </div>
+  
+      <div class="card dashboard-kpi" routerLink="/public/mes-resultats">
+        <div class="card-body">
+          <div class="kpi-top">
+            <div class="kpi-label">Tests réussis</div>
+            <span class="badge bg-green-lt">PASS</span>
+          </div>
+          <div class="kpi-value">{{ data.nbPassedTests }}</div>
+        </div>
+      </div>
+  
+      <div class="card dashboard-kpi" routerLink="/public/mes-resultats">
+        <div class="card-body">
+          <div class="kpi-top">
+            <div class="kpi-label">Tests échoués</div>
+            <span class="badge bg-red-lt">FAIL</span>
+          </div>
+          <div class="kpi-value">{{ data.nbFailedTests }}</div>
+        </div>
+      </div>
+  
+      <div class="card dashboard-kpi" routerLink="/public/mes-resultats">
+        <div class="card-body">
+          <div class="kpi-top">
+            <div class="kpi-label">Moyenne (/20)</div>
+            <span class="badge bg-primary-lt">AVG</span>
+          </div>
+          <div class="kpi-value">{{ data.averageNote | number:'1.0-2' }}</div>
+        </div>
+      </div>
+    </div>
+  
+    <div class="row row-cards">
+      <div class="col-lg-6">
+        <div class="card big-hover-card h-100">
+          <div class="card-header">
+            <div class="card-title">Inscriptions — Détails</div>
+          </div>
+          <div class="card-body">
+            <div class="row g-3 big-hover-content">
+              <div class="col-4">
+                <div class="mini-label">Acceptées</div>
+                <div class="mini-value">{{ data.nbCoursesAccepted }}</div>
+              </div>
+              <div class="col-4">
+                <div class="mini-label">Refusées</div>
+                <div class="mini-value">{{ data.nbCoursesRefused }}</div>
+              </div>
+              <div class="col-4">
+                <div class="mini-label">En attente</div>
+                <div class="mini-value">{{ data.nbCoursesPending }}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+  
+      <div class="col-lg-6">
+        <div class="card big-hover-card h-100">
+          <div class="card-header">
+            <div class="card-title">QCM — Résultats</div>
+          </div>
+          <div class="card-body">
+            <div class="row g-3 big-hover-content">
+              <div class="col-4">
+                <div class="mini-label">Réussis</div>
+                <div class="mini-value">{{ data.nbPassedTests }}</div>
+              </div>
+              <div class="col-4">
+                <div class="mini-label">Échoués</div>
+                <div class="mini-value">{{ data.nbFailedTests }}</div>
+              </div>
+              <div class="col-4">
+                <div class="mini-label">Moyenne</div>
+                <div class="mini-value">{{ data.averageNote | number:'1.0-2' }}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  

@@ -1,0 +1,161 @@
+<div class="page-body admin-users">
+    <div class="page-header mb-4">
+      <div>
+        <h2 class="page-title">Gestion des utilisateurs</h2>
+        <div class="text-secondary">
+          Recherche, filtrage par rôle, modification des utilisateurs.
+        </div>
+      </div>
+  
+      <div class="page-actions" *ngIf="mode === 'edit'">
+        <button class="btn btn-outline-secondary" type="button" (click)="cancel()">Retour</button>
+      </div>
+    </div>
+  
+    <div *ngIf="error" class="alert alert-danger mb-3">{{ error }}</div>
+    <div *ngIf="success" class="alert alert-success mb-3">{{ success }}</div>
+  
+    <div *ngIf="mode === 'list'" class="card">
+      <div class="card-body">
+        <div class="d-flex gap-2 flex-wrap align-items-center">
+          <div class="search-box">
+            <input
+              class="form-control"
+              type="text"
+              [(ngModel)]="search"
+              placeholder="Rechercher (nom ou email)…"
+              (input)="onSearchChange()"
+            />
+          </div>
+  
+          <div class="role-box">
+            <select class="form-select" [(ngModel)]="roleFilter" (change)="onSearchChange()">
+              <option value="">Tous les rôles</option>
+              <option value="ADMIN">ADMIN</option>
+              <option value="PROFESSOR">PROFESSEUR</option>
+              <option value="USER">UTILISATEUR</option>
+            </select>
+          </div>
+  
+          <button
+            class="btn btn-outline-secondary"
+            type="button"
+            (click)="search=''; roleFilter=''; onSearchChange()"
+          >
+            Réinitialiser
+          </button>
+        </div>
+      </div>
+  
+      <div class="table-responsive">
+        <table class="table table-vcenter card-table table-clean">
+          <thead>
+            <tr>
+              <th style="width: 28%">Nom</th>
+              <th style="width: 34%">Email</th>
+              <th style="width: 14%">Rôle</th>
+              <th style="width: 14%">Créé le</th>
+              <th class="text-end" style="width: 10%">Actions</th>
+            </tr>
+          </thead>
+  
+          <tbody>
+            <tr *ngIf="loading">
+              <td colspan="5" class="text-center py-5">
+                <div class="spinner-border text-primary"></div>
+              </td>
+            </tr>
+  
+            <tr *ngIf="!loading && !users.length">
+              <td colspan="5" class="text-center text-secondary py-4">
+                Aucun utilisateur trouvé.
+              </td>
+            </tr>
+  
+            <tr *ngFor="let u of users" class="row-hover">
+              <td class="fw-semibold">
+                <span class="name-cell">{{ u.fullName }}</span>
+              </td>
+              <td class="text-truncate">{{ u.email }}</td>
+              <td>
+                <span
+                  class="badge"
+                  [ngClass]="{
+                    'bg-azure-lt': u.role === 'ADMIN',
+                    'bg-indigo-lt': u.role === 'PROFESSOR',
+                    'bg-green-lt': u.role === 'USER'
+                  }"
+                >
+                  {{ u.role }}
+                </span>
+              </td>
+              <td class="text-secondary">{{ u.createdAt | date:'dd/MM/yyyy' }}</td>
+              <td class="text-end">
+                <button class="btn btn-sm btn-outline-primary" type="button" (click)="openEdit(u)">
+                  Modifier
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  
+    <div *ngIf="mode === 'edit'" class="card">
+      <div class="card-header">
+        <div class="card-title">Modifier l’utilisateur</div>
+        <div class="ms-auto">
+          <button class="btn btn-outline-secondary" type="button" (click)="cancel()">Fermer</button>
+        </div>
+      </div>
+  
+      <div class="card-body">
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label class="form-label">Nom complet</label>
+            <input class="form-control" type="text" [(ngModel)]="form.fullName" />
+          </div>
+  
+          <div class="col-md-6">
+            <label class="form-label">Email</label>
+            <input class="form-control" type="email" [(ngModel)]="form.email" autocomplete="off" />
+          </div>
+  
+          <div class="col-md-6">
+            <label class="form-label">Rôle</label>
+            <select class="form-select" [(ngModel)]="form.role">
+              <option value="ADMIN">ADMIN</option>
+              <option value="PROFESSOR">PROFESSEUR</option>
+              <option value="USER">UTILISATEUR</option>
+            </select>
+          </div>
+  
+          <div class="col-md-6">
+            <label class="form-label">Nouveau mot de passe (optionnel)</label>
+            <div class="input-group">
+              <input
+                class="form-control"
+                [type]="showPassword ? 'text' : 'password'"
+                [(ngModel)]="form.password"
+                autocomplete="new-password"
+              />
+              <button class="btn btn-outline-secondary" type="button" (click)="showPassword = !showPassword">
+                {{ showPassword ? 'Masquer' : 'Afficher' }}
+              </button>
+            </div>
+            <div class="form-hint">Laisser vide pour ne pas changer le mot de passe.</div>
+          </div>
+        </div>
+  
+        <div class="mt-4 d-flex gap-2">
+          <button class="btn btn-primary" type="button" [disabled]="loading" (click)="update()">
+            Enregistrer
+          </button>
+          <button class="btn btn-outline-secondary" type="button" (click)="cancel()">
+            Annuler
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  

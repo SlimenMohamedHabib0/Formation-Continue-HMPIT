@@ -1,0 +1,58 @@
+<div *ngIf="loading" class="text-center py-6">
+    <div class="spinner-border text-primary"></div>
+  </div>
+  
+  <div *ngIf="!loading" class="page-body passer-test-wrap">
+    <div class="page-header mb-3">
+      <div>
+        <div class="page-title">Passer le test</div>
+        <div class="page-subtitle text-secondary">Répondez aux questions (plusieurs choix possibles).</div>
+      </div>
+  
+      <div class="d-flex gap-2">
+        <button class="btn" type="button" (click)="back()">
+          Retour
+        </button>
+  
+        <button class="btn btn-primary" type="button" [disabled]="submitting || !qcm" (click)="submit()">
+          <span *ngIf="submitting" class="spinner-border spinner-border-sm me-2"></span>
+          Soumettre
+        </button>
+      </div>
+    </div>
+  
+    <div *ngIf="alert" class="alert" [ngClass]="{
+        'alert-success': alert.type === 'success',
+        'alert-danger': alert.type === 'danger',
+        'alert-info': alert.type === 'info'
+      }">
+      {{ alert.message }}
+    </div>
+  
+    <div *ngIf="qcm" class="card">
+      <div class="card-body">
+        <div *ngFor="let q of qcm.questions; let qi = index" class="q-block">
+          <div class="q-title">
+            <span class="q-index">Q{{ qi + 1 }}</span>
+            <span class="q-enonce">{{ q.enonce }}</span>
+            <span class="badge bg-primary-lt ms-2">{{ q.points }} pts</span>
+          </div>
+  
+          <div class="choices mt-3">
+            <label *ngFor="let c of q.choix" class="choice-item">
+              <input
+                type="checkbox"
+                class="form-check-input me-2"
+                [checked]="isChecked(q.questionId, c.choixId)"
+                (change)="toggleChoice(q.questionId, c.choixId, $any($event.target).checked)"
+              />
+              <span>{{ c.libelle }}</span>
+            </label>
+          </div>
+  
+          <hr class="my-4" />
+        </div>
+      </div>
+    </div>
+  </div>
+  

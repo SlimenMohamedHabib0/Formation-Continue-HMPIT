@@ -1,0 +1,295 @@
+<div *ngIf="loading" class="text-center py-6">
+    <div class="spinner-border text-primary"></div>
+  </div>
+  
+  <div *ngIf="error" class="alert alert-danger mb-3">
+    {{ error }}
+  </div>
+  
+  <div *ngIf="dashboard" class="page-body dashboard-wrap">
+    <div class="dashboard-header mb-4">
+      <div class="page-title">Dashboard Professeur</div>
+      <div class="dashboard-subtitle">Vue de vos cours, inscriptions et résultats QCM</div>
+    </div>
+  
+    <div class="kpi-grid mb-4">
+      <div class="card dashboard-kpi" role="button" tabindex="0" (click)="go('/prof/mes-cours')" (keydown.enter)="go('/prof/mes-cours')">
+        <div class="card-body">
+          <div class="kpi-top">
+            <div class="kpi-label">Mes cours (total)</div>
+            <span class="badge bg-primary-lt">ALL</span>
+          </div>
+          <div class="kpi-value">{{ dashboard.nbMyCoursesTotal }}</div>
+        </div>
+      </div>
+  
+      <div class="card dashboard-kpi" role="button" tabindex="0" (click)="go('/prof/mes-cours')" (keydown.enter)="go('/prof/mes-cours')">
+        <div class="card-body">
+          <div class="kpi-top">
+            <div class="kpi-label">Cours (brouillons)</div>
+            <span class="badge bg-orange-lt">DRAFT</span>
+          </div>
+          <div class="kpi-value">{{ dashboard.nbMyCoursesDraft }}</div>
+        </div>
+      </div>
+  
+      <div class="card dashboard-kpi" role="button" tabindex="0" (click)="go('/prof/mes-cours')" (keydown.enter)="go('/prof/mes-cours')">
+        <div class="card-body">
+          <div class="kpi-top">
+            <div class="kpi-label">Cours (publiés)</div>
+            <span class="badge bg-green-lt">LIVE</span>
+          </div>
+          <div class="kpi-value">{{ dashboard.nbMyCoursesPublished }}</div>
+        </div>
+      </div>
+  
+      <div class="card dashboard-kpi" role="button" tabindex="0" (click)="go('/prof/inscriptions')" (keydown.enter)="go('/prof/inscriptions')">
+        <div class="card-body">
+          <div class="kpi-top">
+            <div class="kpi-label">Inscriptions (total)</div>
+            <span class="badge bg-azure-lt">TOTAL</span>
+          </div>
+          <div class="kpi-value">{{ dashboard.nbEnrollmentsTotal }}</div>
+        </div>
+      </div>
+  
+      <div class="card dashboard-kpi" role="button" tabindex="0" (click)="go('/prof/inscriptions')" (keydown.enter)="go('/prof/inscriptions')">
+        <div class="card-body">
+          <div class="kpi-top">
+            <div class="kpi-label">Inscriptions (en attente)</div>
+            <span class="badge bg-yellow-lt">PENDING</span>
+          </div>
+          <div class="kpi-value">{{ dashboard.nbEnrollmentsPending }}</div>
+        </div>
+      </div>
+  
+      <div class="card dashboard-kpi" role="button" tabindex="0" (click)="go('/prof/inscriptions')" (keydown.enter)="go('/prof/inscriptions')">
+        <div class="card-body">
+          <div class="kpi-top">
+            <div class="kpi-label">Inscriptions (acceptées)</div>
+            <span class="badge bg-green-lt">OK</span>
+          </div>
+          <div class="kpi-value">{{ dashboard.nbEnrollmentsAccepted }}</div>
+        </div>
+      </div>
+  
+      <div class="card dashboard-kpi" role="button" tabindex="0" (click)="go('/prof/inscriptions')" (keydown.enter)="go('/prof/inscriptions')">
+        <div class="card-body">
+          <div class="kpi-top">
+            <div class="kpi-label">Inscriptions (refusées)</div>
+            <span class="badge bg-red-lt">NO</span>
+          </div>
+          <div class="kpi-value">{{ dashboard.nbEnrollmentsRefused }}</div>
+        </div>
+      </div>
+  
+      <div class="card dashboard-kpi" role="button" tabindex="0" (click)="go('/prof/inscriptions')" (keydown.enter)="go('/prof/inscriptions')">
+        <div class="card-body">
+          <div class="kpi-top">
+            <div class="kpi-label">Tentatives (total)</div>
+            <span class="badge bg-primary-lt">ALL</span>
+          </div>
+          <div class="kpi-value">{{ dashboard.nbAttemptsTotal }}</div>
+        </div>
+      </div>
+  
+      <div class="card dashboard-kpi" role="button" tabindex="0" (click)="go('/prof/inscriptions')" (keydown.enter)="go('/prof/inscriptions')">
+        <div class="card-body">
+          <div class="kpi-top">
+            <div class="kpi-label">Taux de réussite</div>
+            <span class="badge bg-primary-lt">SCORE</span>
+          </div>
+          <div class="kpi-value">{{ formatPercent(dashboard.successRatePercent) }}</div>
+        </div>
+      </div>
+  
+      <div class="card dashboard-kpi" role="button" tabindex="0" (click)="go('/prof/inscriptions')" (keydown.enter)="go('/prof/inscriptions')">
+        <div class="card-body">
+          <div class="kpi-top">
+            <div class="kpi-label">Moyenne (/20)</div>
+            <span class="badge bg-indigo-lt">AVG</span>
+          </div>
+          <div class="kpi-value">
+            <span *ngIf="dashboard.averageNote !== null; else noAvg">
+              {{ dashboard.averageNote | number:'1.0-2' }}
+            </span>
+            <ng-template #noAvg>—</ng-template>
+          </div>
+        </div>
+      </div>
+    </div>
+  
+    <div class="row row-cards mb-4">
+      <div class="col-lg-6">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Inscriptions — Détails</div>
+          </div>
+          <div class="card-body">
+            <div class="row g-3">
+              <div class="col-4">
+                <div class="mini-label">Acceptées</div>
+                <div class="mini-value">{{ dashboard.nbEnrollmentsAccepted }}</div>
+              </div>
+              <div class="col-4">
+                <div class="mini-label">Refusées</div>
+                <div class="mini-value">{{ dashboard.nbEnrollmentsRefused }}</div>
+              </div>
+              <div class="col-4">
+                <div class="mini-label">En attente</div>
+                <div class="mini-value">{{ dashboard.nbEnrollmentsPending }}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+  
+      <div class="col-lg-6">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">QCM — Résultats</div>
+          </div>
+          <div class="card-body">
+            <div class="row g-3">
+              <div class="col-3">
+                <div class="mini-label">Total</div>
+                <div class="mini-value">{{ dashboard.nbAttemptsTotal }}</div>
+              </div>
+              <div class="col-3">
+                <div class="mini-label">Réussies</div>
+                <div class="mini-value">{{ dashboard.nbAttemptsPassed }}</div>
+              </div>
+              <div class="col-3">
+                <div class="mini-label">Échouées</div>
+                <div class="mini-value">{{ dashboard.nbAttemptsFailed }}</div>
+              </div>
+              <div class="col-3">
+                <div class="mini-label">Moyenne (/20)</div>
+                <div class="mini-value">
+                  <span *ngIf="dashboard.averageNote !== null; else noAvg2">
+                    {{ dashboard.averageNote | number:'1.0-2' }}
+                  </span>
+                  <ng-template #noAvg2>—</ng-template>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  
+    <div class="row row-cards">
+      <div class="col-lg-4">
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <div class="card-title">Top cours</div>
+              <div class="card-subtitle">Par inscriptions</div>
+            </div>
+          </div>
+  
+          <div class="table-responsive">
+            <table class="table table-vcenter card-table table-clean table-compact">
+              <thead>
+                <tr>
+                  <th style="width: 60px">#</th>
+                  <th class="text-center">Cours</th>
+                  <th class="text-end" style="width: 148px">Inscriptions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngIf="!dashboard.topCoursesByEnrollments?.length">
+                  <td colspan="3" class="text-secondary px-4 py-4">Aucun résultat.</td>
+                </tr>
+  
+                <tr *ngFor="let item of dashboard.topCoursesByEnrollments; let i = index" class="row-hover">
+                  <td class="text-secondary fw-bold">{{ i + 1 }}</td>
+                  <td class="fw-semibold text-center">
+                    <span class="name-cell">{{ item.courseTitre }}</span>
+                  </td>
+                  <td class="text-center fw-bold" style="width: 148px">{{ item.count }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+  
+      <div class="col-lg-4">
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <div class="card-title">Réussite par cours</div>
+              <div class="card-subtitle">Top 10 par tentatives</div>
+            </div>
+          </div>
+  
+          <div class="table-responsive">
+            <table class="table table-vcenter card-table table-clean table-compact">
+              <thead>
+                <tr>
+                  <th style="width: 60px">#</th>
+                  <th class="text-center">Cours</th>
+                  <th class="text-end" style="width: 126px">Tentatives</th>
+                  <th class="text-end" style="width: 120px">Réussite</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngIf="!dashboard.successRateByCourse?.length">
+                  <td colspan="4" class="text-secondary px-4 py-4">Aucun résultat.</td>
+                </tr>
+  
+                <tr *ngFor="let item of dashboard.successRateByCourse; let i = index" class="row-hover">
+                  <td class="text-secondary fw-bold">{{ i + 1 }}</td>
+                  <td class="fw-semibold text-center">
+                    <span class="name-cell">{{ item.courseTitre }}</span>
+                  </td>
+                  <td class="text-center fw-bold">{{ item.attempts }}</td>
+                  <td class="text-center fw-bold">{{ item.successRatePercent | number:'1.0-2' }}%</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+  
+      <div class="col-lg-4">
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <div class="card-title">Détail QCM par cours</div>
+              <div class="card-subtitle">Réussies vs échouées</div>
+            </div>
+          </div>
+  
+          <div class="table-responsive">
+            <table class="table table-vcenter card-table table-clean table-compact">
+              <thead>
+                <tr>
+                  <th style="width: 60px">#</th>
+                  <th class="text-center">Cours</th>
+                  <th class="text-end" style="width: 110px">Réussies</th>
+                  <th class="text-end" style="width: 119px">Échouées</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngIf="!dashboard.successRateByCourse?.length">
+                  <td colspan="4" class="text-secondary px-4 py-4">Aucun résultat.</td>
+                </tr>
+  
+                <tr *ngFor="let item of dashboard.successRateByCourse; let i = index" class="row-hover">
+                  <td class="text-secondary fw-bold">{{ i + 1 }}</td>
+                  <td class="fw-semibold text-center">
+                    <span class="name-cell">{{ item.courseTitre }}</span>
+                  </td>
+                  <td class="text-center fw-bold">{{ item.passed }}</td>
+                  <td class="text-center fw-bold">{{ item.failed }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  

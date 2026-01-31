@@ -1,0 +1,209 @@
+<div class="page-body test-builder">
+    <div class="page-header mb-4">
+      <div>
+        <div class="d-flex align-items-center gap-2 flex-wrap">
+          <h2 class="page-title mb-0">Gérer le test (QCM)</h2>
+  
+          <span class="badge" [ngClass]="badgeValidityClass()" *ngIf="validity">
+            {{ validity.isValid ? 'VALIDE' : 'INCOMPLET' }}
+          </span>
+        </div>
+  
+        <div class="text-secondary">
+          Ajoutez des questions, gérez les choix et définissez la pondération (total attendu: 20).
+        </div>
+      </div>
+  
+      <div class="d-flex gap-2">
+        <button class="btn btn-outline-secondary" type="button" (click)="back()" [disabled]="saving">
+          Retour
+        </button>
+  
+        <button
+          class="btn btn-primary"
+          type="button"
+          (click)="startCreate()"
+          [disabled]="loading || saving || mode !== 'list'"
+        >
+          Ajouter question
+        </button>
+      </div>
+    </div>
+  
+    <div *ngIf="error" class="alert alert-danger mb-3">{{ error }}</div>
+    <div *ngIf="success" class="alert alert-success mb-3">{{ success }}</div>
+  
+    <div *ngIf="loading" class="card">
+      <div class="card-body text-center py-6">
+        <div class="spinner-border text-primary"></div>
+      </div>
+    </div>
+  
+    <div *ngIf="!loading" class="row g-3">
+      <div class="col-12 col-lg-4">
+        <div class="card h-100">
+          <div class="card-body">
+            <div class="section-title">Validité</div>
+  
+            <div class="kpi-row">
+              <div class="kpi-box">
+                <div class="kpi-label">Total points</div>
+                <div class="kpi-value">
+                  {{ validity?.totalPoints ?? totalPointsLocal }} / 20
+                </div>
+              </div>
+  
+              <div class="kpi-box">
+                <div class="kpi-label">Questions</div>
+                <div class="kpi-value">{{ questions.length }}</div>
+              </div>
+            </div>
+  
+            <div class="mt-3">
+              <div *ngIf="validity?.warnings?.length" class="alert alert-warning mb-0">
+                <div class="fw-semibold mb-1">Warnings</div>
+                <ul class="mb-0 ps-3">
+                  <li *ngFor="let w of validity?.warnings">{{ w }}</li>
+                </ul>
+              </div>
+  
+              <div *ngIf="!validity?.warnings?.length" class="text-secondary small">
+                Aucun warning.
+              </div>
+            </div>
+  
+            <div class="mt-3 text-secondary small">
+              Le test est valide uniquement si le total des points = 20 et chaque question a au moins un bon choix.
+            </div>
+          </div>
+        </div>
+      </div>
+  
+      <div class="col-12 col-lg-8">
+        <div class="card" *ngIf="mode === 'list'">
+          <div class="table-responsive">
+            <table class="table table-vcenter card-table">
+              <thead>
+                <tr>
+                  <th style="width: 58%">Question</th>
+                  <th style="width: 12%">Points</th>
+                  <th style="width: 30%" class="text-end">Actions</th>
+                </tr>
+              </thead>
+  
+              <tbody>
+                <tr *ngIf="!questions.length">
+                  <td colspan="3" class="text-center text-secondary py-4">
+                    Aucune question.
+                  </td>
+                </tr>
+  
+                <tr *ngFor="let q of questions">
+                  <td>
+                    <div class="fw-semibold text-truncate">{{ q.enonce }}</div>
+                    <div class="text-secondary small">
+                      {{ q.choix.length }} choix
+                    </div>
+                  </td>
+                  
+
+
+                  <td class="fw-semibold">{{ q.points }}</td>
+  
+                  <td class="text-end">
+                    <div class="btn-list flex-nowrap justify-content-end">
+                      <button class="btn btn-sm btn-outline-primary" type="button" (click)="startEdit(q)" [disabled]="saving">
+                        Modifier
+                      </button>
+  
+                      <button class="btn btn-sm btn-outline-danger" type="button" (click)="deleteQuestion(q)" [disabled]="saving">
+                        Supprimer
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+  
+        <div class="card" *ngIf="mode !== 'list'">
+          <div class="card-body">
+            <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
+              <div>
+                <div class="section-title">
+                  {{ mode === 'create' ? 'Créer question' : 'Modifier question' }}
+                </div>
+                <div class="text-secondary">
+                  Gérer choix + définir pondération.
+                </div>
+              </div>
+  
+              <div class="d-flex gap-2">
+                <button class="btn btn-outline-secondary" type="button" (click)="cancelForm()" [disabled]="saving">
+                  Annuler
+                </button>
+                <button class="btn btn-primary" type="button" (click)="submit()" [disabled]="saving">
+                  Enregistrer
+                </button>
+              </div>
+            </div>
+  
+            <div class="form-grid">
+              <div class="form-col-full">
+                <label class="form-label">Énoncé</label>
+                <textarea class="form-control" rows="4" [(ngModel)]="enonce" [disabled]="saving"></textarea>
+              </div>
+  
+              <div class="form-col">
+                <label class="form-label">Points</label>
+                <input class="form-control" type="number" min="0" step="0.5" [(ngModel)]="points" [disabled]="saving" />
+                <div class="text-secondary small mt-1">Total attendu: 20</div>
+              </div>
+  
+              <div class="form-col">
+                <label class="form-label">Choix</label>
+                <button class="btn btn-outline-primary w-100" type="button" (click)="addChoice()" [disabled]="saving">
+                  Ajouter choix
+                </button>
+                <div class="text-secondary small mt-1">Minimum 2 choix. Marquez les bons choix.</div>
+              </div>
+  
+              <div class="form-col-full">
+                <div class="choices">
+                  <div class="choice-row" *ngFor="let c of choix; let i = index">
+                    <div class="choice-main">
+                      <input class="form-control" [(ngModel)]="c.libelle" [disabled]="saving" placeholder="Texte du choix" />
+                    </div>
+  
+                    <div class="choice-actions">
+                      <label class="form-check form-switch m-0">
+                        <input class="form-check-input" type="checkbox" [(ngModel)]="c.estCorrect" [disabled]="saving" />
+                        <span class="form-check-label">Correct</span>
+                      </label>
+  
+                      <button
+                        class="btn btn-outline-danger btn-icon"
+                        type="button"
+                        (click)="removeChoice(i)"
+                        [disabled]="saving || choix.length <= 2"
+                        aria-label="Remove"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  </div>
+                </div>
+  
+                <div class="text-secondary small mt-2">
+                  Si aucun choix correct, le backend retournera une invalidité via qcm-validity.
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+  
+      </div>
+    </div>
+  </div>
+  

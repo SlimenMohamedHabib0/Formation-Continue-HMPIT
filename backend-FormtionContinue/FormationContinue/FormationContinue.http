@@ -1,0 +1,6 @@
+@FormationContinue_HostAddress = http://localhost:5104
+ 
+GET {{FormationContinue_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

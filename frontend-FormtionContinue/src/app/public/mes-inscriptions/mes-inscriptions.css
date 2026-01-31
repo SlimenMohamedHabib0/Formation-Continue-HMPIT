@@ -1,0 +1,85 @@
+.ins-wrap {
+    width: 100%;
+    padding: 0 12px;
+  }
+  
+  .page-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+  }
+  
+  .page-title {
+    font-size: 30px;
+    font-weight: 900;
+    color: #0f172a;
+  }
+  
+  .page-subtitle {
+    color: #334155;
+    font-size: 16px;
+    margin-top: 4px;
+  }
+  
+  .search-box {
+    min-width: 360px;
+  }
+  
+  .enroll-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 14px;
+  }
+  
+  @media (max-width: 1200px) {
+    .enroll-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  
+  @media (max-width: 768px) {
+    .enroll-grid {
+      grid-template-columns: repeat(1, minmax(0, 1fr));
+    }
+    .search-box {
+      min-width: 100%;
+    }
+  }
+  
+  .enroll-card {
+    border-radius: 10px;
+    transition: transform 120ms ease;
+  }
+  
+  .enroll-card:hover {
+    transform: scale(1.01);
+  }
+  
+  .enroll-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 10px;
+  }
+  
+  .enroll-title {
+    font-size: 16px;
+    font-weight: 900;
+    color: #0f172a;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  
+  .enroll-meta {
+    margin-top: 8px;
+    font-size: 13px;
+    font-weight: 700;
+  }
+  
+  .enroll-actions {
+    margin-top: 12px;
+  }
+  

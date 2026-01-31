@@ -1,0 +1,190 @@
+<div class="page-body prof-mes-cours">
+    <div class="page-header mb-4">
+      <div>
+        <h2 class="page-title">Mes cours</h2>
+        <div class="text-secondary">
+          Gestion des cours et accès à l’édition et aux tests.
+        </div>
+      </div>
+    </div>
+  
+    <div class="card mb-3">
+      <div class="card-body">
+        <div class="d-flex gap-2 flex-wrap align-items-center justify-content-between">
+          <div class="d-flex gap-2 flex-wrap align-items-center">
+            <button class="btn btn-primary" type="button" (click)="goCreate()">
+              Créer cours
+            </button>
+  
+            <div class="search-box">
+              <input
+                class="form-control"
+                type="text"
+                [(ngModel)]="search"
+                placeholder="Rechercher (titre, description, mots clés)…"
+                (input)="onFiltersChange()"
+              />
+            </div>
+  
+            <div class="status-box">
+              <select class="form-select" [(ngModel)]="selectedEtat" (change)="onFiltersChange()">
+                <option value="">Tous les états</option>
+                <option value="PUBLISHED">PUBLISHED</option>
+                <option value="DRAFT">DRAFT</option>
+              </select>
+            </div>
+  
+            <div class="cat-box">
+              <select
+                class="form-select"
+                [(ngModel)]="selectedCategoryId"
+                (change)="onFiltersChange()"
+                [disabled]="loadingCats"
+              >
+                <option [ngValue]="null">Toutes les catégories</option>
+                <option *ngFor="let c of categories" [ngValue]="c.id">
+                  {{ c.libelle }}
+                </option>
+              </select>
+            </div>
+  
+            <button class="btn btn-outline-secondary" type="button" (click)="_toggleFilters()">
+              Réinitialiser
+            </button>
+          </div>
+  
+          <div class="text-secondary small">
+            {{ filteredCourses.length }} résultat(s)
+          </div>
+        </div>
+      </div>
+    </div>
+  
+    <div *ngIf="error" class="alert alert-danger mb-3">
+      {{ error }}
+    </div>
+  
+    <div *ngIf="actionError" class="alert alert-warning mb-3 alert-glass d-flex align-items-start justify-content-between gap-3">
+      <div class="text-secondary">{{ actionError }}</div>
+      <button class="btn btn-sm btn-outline-secondary" type="button" (click)="dismissActionError()">
+        Fermer
+      </button>
+    </div>
+  
+    <div class="card">
+      <div class="table-responsive">
+        <table class="table table-vcenter card-table table-clean">
+          <thead>
+            <tr>
+              <th style="width: 40%">
+                Titre
+                <div class="text-secondary small text-truncate">motsCles</div>
+              </th>
+              <th style="width: 22%">Catégorie</th>
+              <th style="width: 18%">PDF</th>
+              <th style="width: 12%">État</th>
+              <th class="text-end" style="width: 26%">Actions</th>
+            </tr>
+          </thead>
+  
+          <tbody>
+            <tr *ngIf="loading">
+              <td colspan="5" class="text-center py-5">
+                <div class="spinner-border text-primary"></div>
+              </td>
+            </tr>
+  
+            <tr *ngIf="!loading && !filteredCourses.length">
+              <td colspan="5" class="text-center text-secondary py-4">
+                Aucun cours trouvé.
+              </td>
+            </tr>
+  
+            <tr *ngFor="let c of filteredCourses" class="row-hover">
+              <td class="fw-semibold">
+                <span class="name-cell">{{ c.titre }}</span>
+                <div class="text-secondary small text-truncate">
+                  {{ c.motsCles }}
+                </div>
+              </td>
+  
+              <td class="text-secondary text-truncate">
+                {{ categoryLabelById(c.categoryId) }}
+              </td>
+  
+              <td class="text-secondary text-truncate">
+                <span *ngIf="c.nomFichierPdf; else noPdf">{{ c.nomFichierPdf }}</span>
+                <ng-template #noPdf>—</ng-template>
+              </td>
+  
+              <td>
+                <span
+                  class="badge"
+                  [ngClass]="{
+                    'bg-green-lt': c.etat === 'PUBLISHED',
+                    'bg-orange-lt': c.etat === 'DRAFT'
+                  }"
+                >
+                  {{ c.etat }}
+                </span>
+              </td>
+  
+              <td class="text-end">
+                <div class="btn-list flex-nowrap justify-content-end">
+                  <button
+                    class="btn btn-sm btn-outline-primary"
+                    type="button"
+                    (click)="goEdit(c)"
+                  >
+                    Modifier
+                  </button>
+  
+                  <button
+                    class="btn btn-sm btn-outline-success"
+                    type="button"
+                    (click)="goTest(c)"
+                  >
+                    Gérer test
+                  </button>
+  
+                  <button
+                    *ngIf="c.etat === 'DRAFT'"
+                    class="btn btn-sm btn-outline-warning"
+                    type="button"
+                    (click)="publish(c)"
+                    [disabled]="!canPublish(c) || isActionLoading(c,'publish')"
+                  >
+                    <span *ngIf="isActionLoading(c,'publish')" class="spinner-border spinner-border-sm me-2"></span>
+                    Publier
+                  </button>
+  
+                  <button
+                    *ngIf="c.etat === 'PUBLISHED'"
+                    class="btn btn-sm btn-outline-secondary"
+                    type="button"
+                    (click)="unpublish(c)"
+                    [disabled]="isActionLoading(c,'unpublish')"
+                  >
+                    <span *ngIf="isActionLoading(c,'unpublish')" class="spinner-border spinner-border-sm me-2"></span>
+                    Dépublier
+                  </button>
+  
+                  <button
+                    *ngIf="c.etat === 'DRAFT'"
+                    class="btn btn-sm btn-outline-danger"
+                    type="button"
+                    (click)="deleteCourse(c)"
+                    [disabled]="isActionLoading(c,'delete')"
+                  >
+                    <span *ngIf="isActionLoading(c,'delete')" class="spinner-border spinner-border-sm me-2"></span>
+                    Supprimer
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  

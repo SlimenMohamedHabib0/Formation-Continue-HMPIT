@@ -1,0 +1,120 @@
+.test-builder {
+    padding: 0 12px;
+  }
+  
+  .page-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+  }
+  
+  .page-title {
+    font-size: 26px;
+    font-weight: 900;
+    color: #0f172a;
+  }
+  
+  .section-title {
+    font-size: 13px;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #64748b;
+    margin-bottom: 6px;
+  }
+  
+  .test-builder .card {
+    background: rgba(248, 250, 252, 0.55);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    border: 1px solid rgba(248, 250, 252, 0.35);
+    border-radius: 14px;
+    overflow: hidden;
+  }
+  
+  .table-responsive {
+    overflow-x: hidden;
+    overflow-y: hidden;
+  }
+  
+  .form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+  }
+  
+  .form-col-full {
+    grid-column: 1 / -1;
+  }
+  
+  .choices {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .choice-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px;
+    border-radius: 12px;
+    border: 1px solid rgba(15, 23, 42, 0.12);
+    background: rgba(248, 250, 252, 0.55);
+  }
+  
+  .choice-main {
+    flex: 1;
+    min-width: 0;
+  }
+  
+  .choice-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    white-space: nowrap;
+  }
+  
+  .kpi-row {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+  
+  .kpi-box {
+    padding: 12px;
+    border-radius: 14px;
+    border: 1px solid rgba(15, 23, 42, 0.12);
+    background: rgba(248, 250, 252, 0.55);
+  }
+  
+  .kpi-label {
+    font-size: 12px;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #64748b;
+  }
+  
+  .kpi-value {
+    font-size: 22px;
+    font-weight: 900;
+    color: #0f172a;
+    margin-top: 4px;
+  }
+  
+  @media (max-width: 992px) {
+    .page-header {
+      flex-direction: column;
+    }
+  
+    .form-grid {
+      grid-template-columns: 1fr;
+    }
+  
+    .kpi-row {
+      grid-template-columns: 1fr;
+    }
+  }
+  

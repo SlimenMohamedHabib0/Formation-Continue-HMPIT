@@ -1,0 +1,95 @@
+<div class="page-body admin-categories">
+    <div class="page-header mb-4">
+      <div>
+        <h2 class="page-title">Gestion des catégories</h2>
+        <div class="text-secondary">Recherche, modification et suppression des catégories.</div>
+      </div>
+    </div>
+  
+    <div *ngIf="error" class="alert alert-danger mb-3">{{ error }}</div>
+    <div *ngIf="success" class="alert alert-success mb-3">{{ success }}</div>
+  
+    <div *ngIf="mode === 'list'" class="card">
+      <div class="card-body">
+        <div class="d-flex gap-2 flex-wrap align-items-center">
+          <div class="search-box">
+            <input
+              class="form-control"
+              type="text"
+              [(ngModel)]="search"
+              placeholder="Rechercher une catégorie…"
+              (input)="onSearchInput()"
+            />
+          </div>
+  
+          <button class="btn btn-outline-secondary" type="button" (click)="search=''; onSearchInput()">
+            Réinitialiser
+          </button>
+        </div>
+      </div>
+  
+      <div class="table-responsive">
+        <table class="table table-vcenter card-table table-clean">
+          <thead>
+            <tr>
+              <th>Libellé</th>
+              <th class="text-end" style="width: 220px">Actions</th>
+            </tr>
+          </thead>
+  
+          <tbody>
+            <tr *ngIf="loading">
+              <td colspan="2" class="text-center py-5">
+                <div class="spinner-border text-primary"></div>
+              </td>
+            </tr>
+  
+            <tr *ngIf="!loading && !categories.length">
+              <td colspan="2" class="text-center text-secondary py-4">Aucune catégorie trouvée.</td>
+            </tr>
+  
+            <tr *ngFor="let c of categories" class="row-hover">
+              <td class="fw-semibold">
+                <span class="name-cell">{{ c.libelle }}</span>
+              </td>
+  
+              <td class="text-end">
+                <button class="btn btn-sm btn-outline-primary me-2" type="button" (click)="openEdit(c)">
+                  Modifier
+                </button>
+                <button class="btn btn-sm btn-outline-danger" type="button" (click)="delete(c.id)">
+                  Supprimer
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  
+    <div *ngIf="mode === 'edit'" class="card">
+      <div class="card-header">
+        <div class="card-title">Modifier la catégorie</div>
+        <div class="ms-auto">
+          <button class="btn btn-outline-secondary" type="button" (click)="cancel()">Fermer</button>
+        </div>
+      </div>
+  
+      <div class="card-body">
+        <div class="row g-3">
+          <div class="col-md-8">
+            <label class="form-label">Libellé</label>
+            <input class="form-control" type="text" [(ngModel)]="form.libelle" />
+          </div>
+        </div>
+  
+        <div class="mt-4 d-flex gap-2">
+          <button class="btn btn-primary" type="button" [disabled]="loading" (click)="save()">
+            Enregistrer
+          </button>
+          <button class="btn btn-outline-secondary" type="button" (click)="cancel()">Annuler</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  

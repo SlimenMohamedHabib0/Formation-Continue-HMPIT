@@ -1,0 +1,44 @@
+<header class="navbar navbar-expand-md navbar-dark">
+    <div class="container-fluid px-4">
+  
+      <a
+        class="navbar-brand d-flex align-items-center gap-2"
+        href="javascript:void(0)"
+        (click)="goHome()"
+        id="hmpit-logo"
+      >
+        <img src="/hmpit.png" alt="HMPIT" class="navbar-logo" />
+        <div class="d-flex flex-column lh-sm">
+          <span class="fw-bold">HMPIT</span>
+          <span class="text-secondary d-none d-sm-block">
+            Hopital Militaire Principal d'Instruction de Tunis
+          </span>
+        </div>
+      </a>
+  
+      <div class="navbar-right" *ngIf="items.length">
+        <nav class="navbar-tabs">
+          <a
+            *ngFor="let item of items; trackBy: trackByPath"
+            class="nav-tab"
+            [routerLink]="item.path"
+            routerLinkActive="active"
+            [routerLinkActiveOptions]="{ exact: item.exact ?? false }"
+          >
+            {{ item.label }}
+          </a>
+        </nav>
+      
+        <div class="navbar-user" *ngIf="auth.meSnapshot as me">
+          <span class="navbar-name d-none d-lg-inline">{{ me.fullName }}</span>
+          <span class="badge bg-primary-lt">{{ me.role }}</span>
+          <button class="btn btn-outline-light btn-sm" type="button" (click)="logout()" id="logout-button">
+            Déconnexion
+          </button>
+        </div>
+      </div>
+      
+  
+    </div>
+  </header>
+  

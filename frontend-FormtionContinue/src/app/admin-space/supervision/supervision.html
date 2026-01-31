@@ -1,0 +1,367 @@
+<div class="page-body admin-supervision">
+    <div class="page-header mb-4">
+      <div>
+        <h2 class="page-title">Supervision</h2>
+        <div class="text-secondary">
+          Recherche, Filtrage des cours, inscriptions et résultats.
+        </div>
+      </div>
+    </div>
+  
+    <div class="card mb-3">
+      <div class="card-body">
+        <div class="d-flex gap-2 flex-wrap align-items-center justify-content-between">
+          <div class="d-flex gap-2 flex-wrap align-items-center">
+            <div class="btn-group" role="group">
+              <button
+                class="btn"
+                [ngClass]="viewTab === 'courses' ? 'btn-primary' : 'btn-outline-primary'"
+                type="button"
+                (click)="setViewTab('courses')"
+              >
+                Cours
+              </button>
+              <button
+                class="btn"
+                [ngClass]="viewTab === 'enrollments' ? 'btn-primary' : 'btn-outline-primary'"
+                type="button"
+                (click)="setViewTab('enrollments')"
+              >
+                Inscriptions
+              </button>
+              <button
+                class="btn"
+                [ngClass]="viewTab === 'results' ? 'btn-primary' : 'btn-outline-primary'"
+                type="button"
+                (click)="setViewTab('results')"
+              >
+                Résultats
+              </button>
+            </div>
+  
+            <div class="cat-search-box">
+              <input
+                class="form-control"
+                type="text"
+                [(ngModel)]="categorySearch"
+                placeholder="Chercher une catégorie…"
+                (input)="onCategorySearchChange()"
+              />
+            </div>
+  
+            <div class="cat-box">
+              <select
+                class="form-select"
+                [(ngModel)]="selectedCategoryId"
+                (change)="onCategorySelectChange()"
+                [disabled]="loadingCats"
+              >
+                <option [ngValue]="null">Toutes les catégories</option>
+                <option *ngFor="let c of categories" [ngValue]="c.id">
+                  {{ c.libelle }}
+                </option>
+              </select>
+            </div>
+  
+            <button class="btn btn-outline-secondary" type="button" (click)="resetAllFilters()">
+              Réinitialiser
+            </button>
+          </div>
+  
+          <div class="text-secondary small">
+            <span *ngIf="viewTab === 'courses'">{{ courses.length }} résultat(s)</span>
+            <span *ngIf="viewTab === 'enrollments'">{{ enrollments.length }} résultat(s)</span>
+            <span *ngIf="viewTab === 'results'">{{ attempts.length }} résultat(s)</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  
+    <div *ngIf="error" class="alert alert-danger mb-3">{{ error }}</div>
+    <div *ngIf="success" class="alert alert-success mb-3">{{ success }}</div>
+  
+    <div *ngIf="viewTab === 'courses'" class="card">
+      <div class="card-body">
+        <div class="d-flex gap-2 flex-wrap align-items-center justify-content-between">
+          <div class="d-flex gap-2 flex-wrap align-items-center">
+            <div class="btn-group" role="group">
+              <button
+                class="btn"
+                [ngClass]="courseTab === 'published' ? 'btn-primary' : 'btn-outline-primary'"
+                type="button"
+                (click)="setCourseTab('published')"
+              >
+                Publiés
+              </button>
+              <button
+                class="btn"
+                [ngClass]="courseTab === 'draft' ? 'btn-primary' : 'btn-outline-primary'"
+                type="button"
+                (click)="setCourseTab('draft')"
+              >
+                Brouillons
+              </button>
+            </div>
+  
+            <div class="search-box">
+              <input
+                class="form-control"
+                type="text"
+                [(ngModel)]="courseSearch"
+                placeholder="Rechercher (titre, description, mots clés)…"
+                (input)="onCoursesFiltersChange()"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+  
+      <div class="table-responsive">
+        <table class="table table-vcenter card-table table-clean">
+          <thead>
+            <tr>
+              <th style="width: 34%">Titre</th>
+              <th style="width: 18%">Catégorie</th>
+              <th style="width: 12%">État</th>
+              <th style="width: 14%">Publication</th>
+              <th style="width: 14%">Professeur(s)</th>
+              <th class="text-end" style="width: 8%">Actions</th>
+            </tr>
+          </thead>
+  
+          <tbody>
+            <tr *ngIf="loading">
+              <td colspan="6" class="text-center py-5">
+                <div class="spinner-border text-primary"></div>
+              </td>
+            </tr>
+  
+            <tr *ngIf="!loading && !courses.length">
+              <td colspan="6" class="text-center text-secondary py-4">Aucun cours trouvé.</td>
+            </tr>
+  
+            <tr *ngFor="let c of courses" class="row-hover">
+              <td class="fw-semibold">
+                <span class="name-cell">{{ c.titre }}</span>
+              </td>
+  
+              <td class="text-secondary text-truncate">
+                {{ categoryLabelById(c.categoryId) }}
+              </td>
+  
+              <td>
+                <span
+                  class="badge"
+                  [ngClass]="{
+                    'bg-green-lt': c.etat === 'PUBLISHED',
+                    'bg-orange-lt': c.etat === 'DRAFT'
+                  }"
+                >
+                  {{ c.etat }}
+                </span>
+              </td>
+  
+              <td class="text-secondary">
+                <span *ngIf="c.datePublication">{{ c.datePublication | date:'dd/MM/yyyy' }}</span>
+                <span *ngIf="!c.datePublication">—</span>
+              </td>
+  
+              <td class="text-secondary text-truncate">{{ profLabel(c) }}</td>
+  
+              <td class="text-end">
+                <button
+                  *ngIf="c.etat === 'PUBLISHED'"
+                  class="btn btn-sm btn-outline-warning"
+                  type="button"
+                  (click)="unpublish(c)"
+                  [disabled]="loading"
+                >
+                  Dépublier
+                </button>
+  
+                <button
+                  *ngIf="c.etat === 'DRAFT'"
+                  class="btn btn-sm btn-outline-danger"
+                  type="button"
+                  (click)="deleteDraft(c)"
+                  [disabled]="loading"
+                >
+                  Supprimer
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  
+    <div *ngIf="viewTab === 'enrollments'" class="card">
+      <div class="card-body">
+        <div class="d-flex gap-2 flex-wrap align-items-center">
+          <div class="search-box">
+            <input
+              class="form-control"
+              type="text"
+              [(ngModel)]="enrollmentSearch"
+              placeholder="Rechercher (cours, utilisateur, email)…"
+              (input)="onEnrollmentsFiltersChange()"
+            />
+          </div>
+  
+          <div class="status-box">
+            <select class="form-select" [(ngModel)]="enrollmentStatut" (change)="onEnrollmentsFiltersChange()">
+              <option value="">Tous les statuts</option>
+              <option value="PENDING">PENDING</option>
+              <option value="ACCEPTEE">ACCEPTEE</option>
+              <option value="REFUSEE">REFUSEE</option>
+            </select>
+          </div>
+        </div>
+      </div>
+  
+      <div class="table-responsive">
+        <table class="table table-vcenter card-table table-clean">
+          <thead>
+            <tr>
+              <th style="width: 22%">Cours</th>
+              <th style="width: 16%">Catégorie</th>
+              <th style="width: 20%">Utilisateur</th>
+              <th style="width: 16%">Email</th>
+              <th style="width: 10%">Statut</th>
+              <th style="width: 8%">Demande</th>
+              <th style="width: 8%">Décision</th>
+            </tr>
+          </thead>
+  
+          <tbody>
+            <tr *ngIf="loading">
+              <td colspan="7" class="text-center py-5">
+                <div class="spinner-border text-primary"></div>
+              </td>
+            </tr>
+  
+            <tr *ngIf="!loading && !enrollments.length">
+              <td colspan="7" class="text-center text-secondary py-4">Aucune inscription trouvée.</td>
+            </tr>
+  
+            <tr *ngFor="let e of enrollments" class="row-hover">
+              <td class="fw-semibold">
+                <span class="name-cell">{{ e.courseTitre }}</span>
+              </td>
+  
+              <td class="text-secondary text-truncate">
+                {{ categoryLabelById(e.categoryId) }}
+              </td>
+  
+              <td class="text-secondary text-truncate">{{ e.userFullName }}</td>
+              <td class="text-secondary text-truncate">{{ e.userEmail }}</td>
+  
+              <td>
+                <span
+                  class="badge"
+                  [ngClass]="{
+                    'bg-green-lt': e.statut === 'ACCEPTEE',
+                    'bg-red-lt': e.statut === 'REFUSEE',
+                    'bg-yellow-lt': e.statut === 'PENDING'
+                  }"
+                >
+                  {{ e.statut }}
+                </span>
+              </td>
+              
+  
+              <td class="text-secondary">
+                {{ e.dateDemande | date:'dd/MM/yyyy' }}
+              </td>
+  
+              <td class="text-secondary">
+                <span *ngIf="e.dateDecision">{{ e.dateDecision | date:'dd/MM/yyyy' }}</span>
+                <span *ngIf="!e.dateDecision">—</span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  
+    <div *ngIf="viewTab === 'results'" class="card">
+      <div class="card-body">
+        <div class="d-flex gap-2 flex-wrap align-items-center">
+          <div class="search-box">
+            <input
+              class="form-control"
+              type="text"
+              [(ngModel)]="attemptSearch"
+              placeholder="Rechercher (cours, utilisateur, email)…"
+              (input)="onAttemptsFiltersChange()"
+            />
+          </div>
+  
+          <div class="status-box">
+            <select class="form-select" [(ngModel)]="attemptStatut" (change)="onAttemptsFiltersChange()">
+              <option value="">Tous les statuts</option>
+              <option value="REUSSI">REUSSI</option>
+              <option value="ECHOUE">ECHOUE</option>
+            </select>
+          </div>
+        </div>
+      </div>
+  
+      <div class="table-responsive">
+        <table class="table table-vcenter card-table table-clean">
+          <thead>
+            <tr>
+              <th style="width: 26%">Cours</th>
+              <th style="width: 18%">Utilisateur</th>
+              <th style="width: 18%">Email</th>
+              <th style="width: 14%">Date</th>
+              <th style="width: 12%">Note/20</th>
+              <th style="width: 12%">Statut</th>
+            </tr>
+          </thead>
+  
+          <tbody>
+            <tr *ngIf="loading">
+              <td colspan="6" class="text-center py-5">
+                <div class="spinner-border text-primary"></div>
+              </td>
+            </tr>
+  
+            <tr *ngIf="!loading && !attempts.length">
+              <td colspan="6" class="text-center text-secondary py-4">Aucun résultat trouvé.</td>
+            </tr>
+  
+            <tr *ngFor="let a of attempts" class="row-hover">
+              <td class="fw-semibold">
+                <span class="name-cell">{{ a.courseTitre }}</span>
+              </td>
+  
+              <td class="text-secondary text-truncate">{{ a.userFullName }}</td>
+              <td class="text-secondary text-truncate">{{ a.userEmail }}</td>
+  
+              <td class="text-secondary">
+                {{ a.dateTentative | date:'dd/MM/yyyy' }}
+              </td>
+  
+              <td class="fw-semibold">
+                {{ a.noteSur20 }}
+              </td>
+  
+              <td>
+                <span
+                  class="badge"
+                  [ngClass]="{
+                    'bg-green-lt': a.statutTentative === 'REUSSI',
+                    'bg-red-lt': a.statutTentative === 'ECHOUE'
+                  }"
+                >
+                  {{ a.statutTentative }}
+                </span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  

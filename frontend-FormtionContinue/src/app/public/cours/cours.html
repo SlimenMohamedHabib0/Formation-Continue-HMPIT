@@ -1,0 +1,66 @@
+
+<div *ngIf="loading" class="text-center py-6">
+    <div class="spinner-border text-primary"></div>
+  </div>
+  
+  <div *ngIf="!loading" class="page-body catalog-wrap">
+    <div class="page-header mb-4">
+      <div>
+        <div class="page-title">Catalogue des cours</div>
+        <div class="page-subtitle">Cours publiés disponibles</div>
+      </div>
+  
+      <div class="filters">
+        <input
+          type="text"
+          class="form-control search-box"
+          placeholder="Rechercher un cours..."
+          [(ngModel)]="search"
+          (ngModelChange)="onSearchChange()"
+        />
+      </div>
+    </div>
+  
+    <div *ngIf="error" class="alert alert-danger">{{ error }}</div>
+  
+    <div class="cards-grid">
+      <div *ngIf="!courses?.length" class="text-secondary px-2 py-3">
+        Aucun cours trouvé.
+      </div>
+  
+      <div *ngFor="let c of courses" class="card course-card">
+        <div class="card-body">
+          <div class="course-header">
+            <div class="course-title">{{ c.titre }}</div>
+            <span class="badge bg-azure-lt">{{ c.categoryLibelle }}</span>
+          </div>
+  
+          <div class="course-desc">
+            {{ c.description }}
+          </div>
+  
+          <div class="course-keywords" *ngIf="keywords(c.motsCles)?.length">
+            <span *ngFor="let k of keywords(c.motsCles)" class="badge bg-secondary-lt">
+              {{ k }}
+            </span>
+          </div>
+  
+          <div class="course-actions">
+            <span *ngIf="getStatus(c.id) as st" class="badge" [ngClass]="statusBadge(st)">
+              {{ statusLabel(st) }}
+            </span>
+  
+            <button
+              class="btn btn-primary"
+              [disabled]="!canRequest(c.id) || isRowLoading(c.id)"
+              (click)="request(c.id)"
+            >
+              <span *ngIf="!isRowLoading(c.id)">Demander inscription</span>
+              <span *ngIf="isRowLoading(c.id)" class="spinner-border spinner-border-sm"></span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
