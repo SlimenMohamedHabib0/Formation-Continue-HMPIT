@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Hosting;
 
 namespace FormationContinue.Controllers
 {
@@ -15,10 +16,14 @@ namespace FormationContinue.Controllers
     public class CourseController : ControllerBase
     {
         private readonly AppDbContext _context;
-        public CourseController(AppDbContext context)
-        { 
+        private readonly IWebHostEnvironment _env;
+
+        public CourseController(AppDbContext context, IWebHostEnvironment env)
+        {
             _context = context;
+            _env = env;
         }
+
 
         [HttpGet("courses")]
         public async Task<ActionResult<List<CourseResponseDto>>> GetAll([FromQuery] string? search, [FromQuery] int? categoryId)
@@ -54,8 +59,12 @@ namespace FormationContinue.Controllers
                     Etat = cp.Course.Etat,
                     DatePublication = cp.Course.DatePublication,
                     NomFichierPdf = cp.Course.NomFichierPdf,
+                    VideoFileName = cp.Course.VideoFileName,
+                    VideoMimeType = cp.Course.VideoMimeType,
+                    VideoPath = cp.Course.VideoPath,
                     CategoryId = cp.Course.CategoryId
                 })
+
                 .ToListAsync();
 
             return Ok(courses);
@@ -90,15 +99,55 @@ namespace FormationContinue.Controllers
                 Id = course.Id,
                 Titre = course.Titre,
                 Description = course.Description,
-                MotsCles =course.MotsCles,
+                MotsCles = course.MotsCles,
                 Etat = course.Etat,
-                DatePublication=course.DatePublication,
-                NomFichierPdf = course.NomFichierPdf,
-                CategoryId = course.CategoryId
+                DatePublication = course.DatePublication,
 
+                NomFichierPdf = course.NomFichierPdf,
+
+                VideoFileName = course.VideoFileName,
+                VideoMimeType = course.VideoMimeType,
+                VideoPath = course.VideoPath,
+
+                CategoryId = course.CategoryId
             };
+
+
+
             return Ok(CourseDto);
         }
+        [HttpGet("courses/{id}/video")]
+        public async Task<IActionResult> GetVideo(int id)
+        {
+            var professorId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (professorId == null || !int.TryParse(professorId, out var professorIdInt))
+                return Unauthorized();
+
+            var course = await _context.CourseProfessors
+                .AsNoTracking()
+                .Where(cp => cp.ProfessorId == professorIdInt && cp.CourseId == id)
+                .Select(cp => cp.Course)
+                .FirstOrDefaultAsync();
+
+            if (course == null)
+                return NotFound();
+
+            if (string.IsNullOrWhiteSpace(course.VideoPath))
+                return NotFound("Video not found.");
+
+            var webRoot = _env.WebRootPath ?? "wwwroot";
+            var rel = course.VideoPath.TrimStart('/').Replace('/', Path.DirectorySeparatorChar);
+            var abs = Path.Combine(webRoot, rel);
+
+            if (!System.IO.File.Exists(abs))
+                return NotFound("Video not found.");
+
+            var mime = string.IsNullOrWhiteSpace(course.VideoMimeType) ? "video/mp4" : course.VideoMimeType;
+            return PhysicalFile(abs, mime, enableRangeProcessing: true);
+        }
+
+
+
         [HttpPost("courses")]
         public async Task<ActionResult<CourseResponseDto>> Create(CourseCreateDto dto)
         {
@@ -250,6 +299,61 @@ namespace FormationContinue.Controllers
 
             return NoContent();
         }
+        [HttpPost("courses/{id}/attach-video")]
+        public async Task<IActionResult> AttachVideo(int id, IFormFile video)
+        {
+            var professorId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (professorId == null || !int.TryParse(professorId, out var professorIdInt))
+                return Unauthorized();
+
+            var course = await _context.CourseProfessors
+                .Where(cp => cp.ProfessorId == professorIdInt && cp.CourseId == id)
+                .Select(cp => cp.Course)
+                .FirstOrDefaultAsync();
+
+            if (course == null)
+                return NotFound();
+
+            if (course.Etat != "DRAFT")
+                return BadRequest("La vidéo ne peut être ajoutée que sur un cours brouillon.");
+
+            if (video == null || video.Length == 0)
+                return BadRequest("Le fichier vidéo est obligatoire.");
+
+            var contentType = (video.ContentType ?? "").Trim().ToLower();
+            if (!contentType.StartsWith("video/"))
+                return BadRequest("Format vidéo non supporté.");
+
+            var webRoot = _env.WebRootPath ?? "wwwroot";
+            var uploadsRoot = Path.Combine(webRoot, "uploads", "videos");
+            Directory.CreateDirectory(uploadsRoot);
+
+            if (!string.IsNullOrWhiteSpace(course.VideoPath))
+            {
+                var oldRel = course.VideoPath.TrimStart('/').Replace('/', Path.DirectorySeparatorChar);
+                var oldAbs = Path.Combine(webRoot, oldRel);
+                if (System.IO.File.Exists(oldAbs))
+                    System.IO.File.Delete(oldAbs);
+            }
+
+            var ext = Path.GetExtension(video.FileName);
+            if (string.IsNullOrWhiteSpace(ext)) ext = ".mp4";
+
+            var storedName = $"{Guid.NewGuid():N}{ext}";
+            var absPath = Path.Combine(uploadsRoot, storedName);
+
+            using (var fs = new FileStream(absPath, FileMode.Create))
+            {
+                await video.CopyToAsync(fs);
+            }
+
+            course.VideoFileName = video.FileName;
+            course.VideoMimeType = video.ContentType;
+            course.VideoPath = $"/uploads/videos/{storedName}";
+
+            await _context.SaveChangesAsync();
+            return NoContent();
+        }
 
         [HttpPost("courses/{id}/publish")]
         public async Task<IActionResult> Publish(int id)
@@ -279,10 +383,14 @@ namespace FormationContinue.Controllers
                 return BadRequest("Only draft courses can be published.");
             }
 
-            if (course.ContenuPdf == null || course.ContenuPdf.Length == 0 || string.IsNullOrWhiteSpace(course.NomFichierPdf))
+            var hasPdf = course.ContenuPdf != null && course.ContenuPdf.Length > 0 && !string.IsNullOrWhiteSpace(course.NomFichierPdf);
+            var hasVideo = !string.IsNullOrWhiteSpace(course.VideoPath);
+
+            if (!hasPdf && !hasVideo)
             {
-                return BadRequest("You must attach a PDF before publishing.");
+                return BadRequest("Vous devez ajouter un PDF ou une vidéo avant de publier.");
             }
+
 
             course.Etat = "PUBLISHED";
             course.DatePublication = DateTime.UtcNow;
@@ -350,15 +458,35 @@ namespace FormationContinue.Controllers
             if (attemptsCount > 0)
                 return BadRequest("Cannot delete course: attempts exist.");
 
+            var courseQuestions = await _context.CourseQuestions
+                .Where(qc => qc.CourseId == id)
+                .ToListAsync();
+            _context.CourseQuestions.RemoveRange(courseQuestions);
+
+            var enrollments = await _context.Enrollments
+                .Where(e => e.CourseId == id)
+                .ToListAsync();
+
+            if (enrollments.Count > 0)
+            {
+                var enrollmentIds = enrollments.Select(e => e.Id).ToList();
+
+                var progresses = await _context.Progress
+                    .Where(p => enrollmentIds.Contains(p.EnrollmentId))
+                    .ToListAsync();
+                _context.Progress.RemoveRange(progresses);
+
+                _context.Enrollments.RemoveRange(enrollments);
+            }
+
             var links = await _context.CourseProfessors
                 .Where(cp => cp.CourseId == id)
                 .ToListAsync();
-
             _context.CourseProfessors.RemoveRange(links);
+
             _context.Courses.Remove(course);
 
             await _context.SaveChangesAsync();
-
             return NoContent();
         }
 

@@ -28,7 +28,14 @@ namespace FormationContinue.Models
         public string? NomFichierPdf { get; set; }
 
         public byte[]? ContenuPdf { get; set; }
+        [MaxLength(255)]
+        public string? VideoFileName { get; set; }
 
+        [MaxLength(600)]
+        public string? VideoPath { get; set; }
+
+        [MaxLength(100)]
+        public string? VideoMimeType { get; set; }
         [Required]
         public int CategoryId { get; set; }
         public Category Category { get; set; } = null!;

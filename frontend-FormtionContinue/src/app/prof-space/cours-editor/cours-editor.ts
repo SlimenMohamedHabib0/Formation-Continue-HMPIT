@@ -39,7 +39,10 @@ export class CoursEditor implements OnInit, OnDestroy {
   saving = false;
   error: string | null = null;
   success: string | null = null;
+  videoUrl: SafeResourceUrl | null = null;
+private videoObjectUrl: string | null = null;
 
+  
   isEdit = false;
   courseId: number | null = null;
   course: ICours | null = null;
@@ -73,7 +76,7 @@ export class CoursEditor implements OnInit, OnDestroy {
     private route: ActivatedRoute,
     private router: Router,
     private http: HttpClient,
-    private coursSrvc: ProfCoursSrvc,
+    public coursSrvc: ProfCoursSrvc,
     private sanitizer: DomSanitizer
   ) {}
 
@@ -116,15 +119,49 @@ export class CoursEditor implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.sub.unsubscribe();
     this.cleanupPdfUrl();
+    this.cleanupVideoUrl();
   }
-
+  buildVideoUrl(): void {
+    this.cleanupVideoUrl();
+  
+    if (!this.courseId || !this.course?.videoFileName) {
+      this.videoUrl = null;
+      return;
+    }
+  
+    this.coursSrvc.getVideoBlob(this.courseId).subscribe({
+      next: (blob) => {
+        this.videoObjectUrl = URL.createObjectURL(blob);
+        this.videoUrl = this.sanitizer.bypassSecurityTrustResourceUrl(this.videoObjectUrl);
+      },
+      error: () => {
+        this.videoUrl = null;
+      },
+    });
+  }
+  
+  private cleanupVideoUrl(): void {
+    if (this.videoObjectUrl) {
+      URL.revokeObjectURL(this.videoObjectUrl);
+      this.videoObjectUrl = null;
+    }
+    this.videoUrl = null;
+  }
+  
   private cleanupPdfUrl(): void {
     if (this.pdfObjectUrl) {
       URL.revokeObjectURL(this.pdfObjectUrl);
       this.pdfObjectUrl = null;
     }
     this.pdfUrl = null;
+  
+    if (this.videoObjectUrl) {
+      URL.revokeObjectURL(this.videoObjectUrl);
+      this.videoObjectUrl = null;
+    }
+    this.videoUrl = null;
   }
+  
 
   private loadMe(): void {
     this.http.get<ImeDto>(`${environment.apiUrl}/Auth/me`).subscribe({
@@ -155,7 +192,7 @@ export class CoursEditor implements OnInit, OnDestroy {
     if (!this.isEdit) return true;
     return (this.course?.etat ?? '') === 'DRAFT';
   }
-
+  
   loadCourse(id: number): void {
     this.loading = true;
     this.error = null;
@@ -171,6 +208,7 @@ export class CoursEditor implements OnInit, OnDestroy {
         this.fetchCategoryName(c.categoryId);
         this.fetchCategories('');
         this.buildPdfUrl();
+        this.buildVideoUrl();
         this.loadCoTeachers();
       },
       error: () => {
@@ -179,6 +217,34 @@ export class CoursEditor implements OnInit, OnDestroy {
       },
     });
   }
+  onVideoSelected(ev: Event): void {
+    if (!this.courseId) return;
+    if (!this.canEdit) return;
+  
+    const input = ev.target as HTMLInputElement;
+    const file = input.files && input.files.length > 0 ? input.files[0] : null;
+    input.value = '';
+    if (!file) return;
+  
+    this.resetMessages();
+    this.saving = true;
+  
+    this.coursSrvc.attachVideo(this.courseId, file).subscribe({
+      next: () => {
+        this.saving = false;
+        this.success = 'Vidéo attachée.';
+        this.loadCourse(this.courseId!);
+      },
+      error: (e) => {
+        this.saving = false;
+        const msg = (e?.error ?? '').toString();
+        this.error = msg ? msg : 'Impossible d’attacher la vidéo.';
+      },
+    });
+  }
+  
+  
+
 
   fetchCategoryName(categoryId: number): void {
     this.http.get<Icategory>(`${environment.apiUrl}/categories/${categoryId}`).subscribe({
@@ -300,7 +366,7 @@ export class CoursEditor implements OnInit, OnDestroy {
       },
     });
   }
-
+  
   buildPdfUrl(): void {
     this.cleanupPdfUrl();
 

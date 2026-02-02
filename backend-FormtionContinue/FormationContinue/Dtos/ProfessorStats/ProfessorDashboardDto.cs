@@ -10,6 +10,7 @@
         public int NbEnrollmentsPending { get; set; }
         public int NbEnrollmentsAccepted { get; set; }
         public int NbEnrollmentsRefused { get; set; }
+        public string ProfessorName { get; set; }
 
         public int NbAttemptsTotal { get; set; }
         public int NbAttemptsPassed { get; set; }

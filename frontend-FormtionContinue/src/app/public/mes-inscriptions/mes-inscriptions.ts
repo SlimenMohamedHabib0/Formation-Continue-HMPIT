@@ -1,7 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { Subject, Subscription, debounceTime, distinctUntilChanged } from 'rxjs';
 import { PublicSrvc } from '../public-srvc';
 
 type Statut = 'ACCEPTEE' | 'PENDING' | 'REFUSEE';
@@ -22,7 +23,7 @@ interface IEnroll {
   templateUrl: './mes-inscriptions.html',
   styleUrl: './mes-inscriptions.css',
 })
-export class MesInscriptions implements OnInit {
+export class MesInscriptions implements OnInit, OnDestroy {
   loading = true;
   error: string | null = null;
 
@@ -33,10 +34,23 @@ export class MesInscriptions implements OnInit {
   pending: IEnroll[] = [];
   refused: IEnroll[] = [];
 
+  private search$ = new Subject<string>();
+  private sub = new Subscription();
+
   constructor(private srvc: PublicSrvc, private router: Router) {}
 
   ngOnInit(): void {
+    this.sub.add(
+      this.search$
+        .pipe(debounceTime(200), distinctUntilChanged())
+        .subscribe(() => this.load())
+    );
+
     this.load();
+  }
+
+  ngOnDestroy(): void {
+    this.sub.unsubscribe();
   }
 
   load(): void {
@@ -59,9 +73,9 @@ export class MesInscriptions implements OnInit {
 
         this.items = list.sort((a, b) => rank(a.statut) - rank(b.statut));
 
-        this.accepted = this.items.filter(x => (x.statut ?? '').toUpperCase() === 'ACCEPTEE');
-        this.pending = this.items.filter(x => (x.statut ?? '').toUpperCase() === 'PENDING');
-        this.refused = this.items.filter(x => (x.statut ?? '').toUpperCase() === 'REFUSEE');
+        this.accepted = this.items.filter((x) => (x.statut ?? '').toUpperCase() === 'ACCEPTEE');
+        this.pending = this.items.filter((x) => (x.statut ?? '').toUpperCase() === 'PENDING');
+        this.refused = this.items.filter((x) => (x.statut ?? '').toUpperCase() === 'REFUSEE');
 
         this.loading = false;
       },
@@ -77,21 +91,7 @@ export class MesInscriptions implements OnInit {
   }
 
   onSearchInput(): void {
-    this.load();
-  }
-
-  badge(statut: string): string {
-    const v = (statut ?? '').toUpperCase();
-    if (v === 'ACCEPTEE') return 'badge bg-green-lt';
-    if (v === 'PENDING') return 'badge bg-yellow-lt';
-    return 'badge bg-red-lt';
-  }
-
-  label(statut: string): string {
-    const v = (statut ?? '').toUpperCase();
-    if (v === 'ACCEPTEE') return 'Acceptée';
-    if (v === 'PENDING') return 'En attente';
-    return 'Refusée';
+    this.search$.next(this.search);
   }
 
   openCourse(courseId: number): void {

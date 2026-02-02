@@ -6,6 +6,8 @@ import { Professeurs } from './professeurs/professeurs';
 import { Utilisateurs } from './utilisateurs/utilisateurs';
 import { Supervision } from './supervision/supervision';
 import { Categories } from './categories/categories';
+import { Dashboard as ProfDashboardAdmin } from './professeurs/dashboard/dashboard';
+
 
 const routes: Routes = [
   {
@@ -14,6 +16,7 @@ const routes: Routes = [
     children: [
       { path: '', component: Dashboard, pathMatch: 'full' },
       { path: 'professeurs', component: Professeurs },
+      { path: 'professeurs/:id/dashboard', component: ProfDashboardAdmin },
       { path: 'utilisateurs', component: Utilisateurs },
       { path: 'supervision', component: Supervision },
       { path: 'categories', component: Categories },

@@ -124,6 +124,18 @@ namespace FormationContinue.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("NVARCHAR2(200)");
 
+                    b.Property<string>("VideoFileName")
+                        .HasMaxLength(255)
+                        .HasColumnType("NVARCHAR2(255)");
+
+                    b.Property<string>("VideoMimeType")
+                        .HasMaxLength(100)
+                        .HasColumnType("NVARCHAR2(100)");
+
+                    b.Property<string>("VideoPath")
+                        .HasMaxLength(600)
+                        .HasColumnType("NVARCHAR2(600)");
+
                     b.HasKey("Id");
 
                     b.HasIndex("CategoryId");

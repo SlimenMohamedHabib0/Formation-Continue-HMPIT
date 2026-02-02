@@ -1,5 +1,6 @@
 ﻿using FormationContinue.Data;
 using FormationContinue.Dtos.Progress;
+using FormationContinue.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -26,30 +27,30 @@ namespace FormationContinue.Controllers
             if (userId == null || !int.TryParse(userId, out var userIdInt))
                 return Unauthorized();
 
-            if (page <= 0)
-                return BadRequest("Invalid page.");
-            if (totalPages <= 0)
-                return BadRequest("Invalid totalPages.");
-
-            if (page > totalPages)
-                page = totalPages;
+            if (page <= 0) return BadRequest("Invalid page.");
+            if (totalPages <= 0) return BadRequest("Invalid totalPages.");
+            if (page > totalPages) page = totalPages;
 
             var enrollment = await _context.Enrollments
                 .FirstOrDefaultAsync(e => e.CourseId == courseId && e.UserId == userIdInt);
 
-            if (enrollment == null)
-                return NotFound("Enrollment not found.");
-
-            if (enrollment.Statut != "ACCEPTEE")
-                return BadRequest("Enrollment not accepted.");
+            if (enrollment == null) return NotFound("Enrollment not found.");
+            if (enrollment.Statut != "ACCEPTEE") return BadRequest("Enrollment not accepted.");
 
             var progress = await _context.Progress
                 .FirstOrDefaultAsync(p => p.EnrollmentId == enrollment.Id);
 
             if (progress == null)
-                return NotFound("Progress not found.");
+            {
+                progress = new CourseProgress
+                {
+                    EnrollmentId = enrollment.Id,
+                    DernierePageAtteinte = 0,
+                    DateCompletion = null
+                };
+                _context.Progress.Add(progress);
+            }
 
-          
             if (progress.DernierePageAtteinte < page)
                 progress.DernierePageAtteinte = page;
 
@@ -59,6 +60,8 @@ namespace FormationContinue.Controllers
             await _context.SaveChangesAsync();
             return NoContent();
         }
+
+
 
         [HttpGet("courses/{courseId}/progress")]
         public async Task<ActionResult<ProgressResponseDto>> GetProgress(int courseId)
@@ -71,23 +74,22 @@ namespace FormationContinue.Controllers
                 .AsNoTracking()
                 .FirstOrDefaultAsync(e => e.CourseId == courseId && e.UserId == userIdInt);
 
-            if (enrollment == null)
-                return NotFound("Enrollment not found.");
+            if (enrollment == null) return NotFound("Enrollment not found.");
 
             var progress = await _context.Progress
                 .AsNoTracking()
                 .FirstOrDefaultAsync(p => p.EnrollmentId == enrollment.Id);
 
-            if (progress == null)
-                return NotFound("Progress not found.");
-
             return Ok(new ProgressResponseDto
             {
                 CourseId = courseId,
                 EnrollmentId = enrollment.Id,
-                DernierePageAtteinte = progress.DernierePageAtteinte,
-                DateCompletion = progress.DateCompletion
+                DernierePageAtteinte = progress?.DernierePageAtteinte ?? 0,
+                DateCompletion = progress?.DateCompletion
             });
         }
+
+
+
     }
 }

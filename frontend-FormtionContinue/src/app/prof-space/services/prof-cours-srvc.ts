@@ -59,19 +59,27 @@ export class ProfCoursSrvc {
     return this.http.post<void>(`${environment.apiUrl}/courses/${id}/attach-pdf`, fd);
   }
 
+  
   publishCourse(id: number): Observable<void> {
-    return this.http.post<void>(`${environment.apiUrl}/courses/${id}/qcm/publish`, {});
+    return this.http.post<void>(`${environment.apiUrl}/courses/${id}/publish`, {});
   }
 
   unpublishCourse(id: number): Observable<void> {
     return this.http.post<void>(`${environment.apiUrl}/courses/${id}/unpublish`, {});
   }
 
-
   deleteCourse(id: number): Observable<void> {
     return this.http.delete<void>(`${environment.apiUrl}/courses/${id}`);
   }
 
+  getPdfBlob(id: number): Observable<Blob> {
+    return this.http.get(`${environment.apiUrl}/courses/${id}/pdf`, { responseType: 'blob' });
+  }
+
+ 
+
+
+  // ---- Co-teachers ----
   getCoProfessors(courseId: number): Observable<any[]> {
     return this.http.get<any[]>(
       `${environment.apiUrl}/professor/courses/${courseId}/co-professors`
@@ -97,38 +105,41 @@ export class ProfCoursSrvc {
     );
   }
 
-  getPdfBlob(id: number): Observable<Blob> {
-    return this.http.get(`${environment.apiUrl}/courses/${id}/pdf`, {
-      responseType: 'blob',
-    });
-  }
+  // ---- Enrollments ----
   getEnrollments(statut?: string, search?: string): Observable<any[]> {
     const params: string[] = [];
-  
-    if (statut) params.push(`statut=${encodeURIComponent(statut)}`);
-    if (search) params.push(`search=${encodeURIComponent(search)}`);
-  
+
+    const st = statut?.trim();
+    if (st) params.push(`statut=${encodeURIComponent(st)}`);
+
+    const s = search?.trim();
+    if (s) params.push(`search=${encodeURIComponent(s)}`);
+
     const url =
       params.length > 0
         ? `${environment.apiUrl}/professor/enrollments?${params.join('&')}`
         : `${environment.apiUrl}/professor/enrollments`;
-  
+
     return this.http.get<any[]>(url);
   }
-  
+
   acceptEnrollment(id: number): Observable<void> {
-    return this.http.post<void>(
-      `${environment.apiUrl}/professor/enrollments/${id}/accept`,
-      {}
-    );
+    return this.http.post<void>(`${environment.apiUrl}/professor/enrollments/${id}/accept`, {});
   }
-  
+
   refuseEnrollment(id: number): Observable<void> {
-    return this.http.post<void>(
-      `${environment.apiUrl}/professor/enrollments/${id}/refuse`,
-      {}
-    );
+    return this.http.post<void>(`${environment.apiUrl}/professor/enrollments/${id}/refuse`, {});
+  }
+  attachVideo(id: number, file: File) {
+    const fd = new FormData();
+    fd.append('video', file);
+    return this.http.post<void>(`${environment.apiUrl}/courses/${id}/attach-video`, fd);
   }
   
+  getVideoBlob(id: number) {
+    return this.http.get(`${environment.apiUrl}/courses/${id}/video`, {
+      responseType: 'blob',
+    });
+  }
   
 }

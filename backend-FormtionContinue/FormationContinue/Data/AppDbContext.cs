@@ -47,6 +47,10 @@ namespace FormationContinue.Data
                 entity.Property(c => c.MotsCles).HasMaxLength(255).IsRequired();
                 entity.Property(c => c.Etat).HasMaxLength(50).IsRequired();
                 entity.Property(c => c.NomFichierPdf).HasMaxLength(255);
+                entity.Property(c => c.VideoFileName).HasMaxLength(255);
+                entity.Property(c => c.VideoPath).HasMaxLength(600);
+                entity.Property(c => c.VideoMimeType).HasMaxLength(100);
+
 
                 entity.Property(c => c.ContenuPdf).HasColumnType("BLOB");
 

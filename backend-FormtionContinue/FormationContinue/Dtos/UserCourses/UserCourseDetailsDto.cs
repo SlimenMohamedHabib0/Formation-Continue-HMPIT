@@ -13,6 +13,10 @@
 
         public string? NomFichierPdf { get; set; }
 
+        public string? VideoFileName { get; set; }
+        public string? VideoPath { get; set; }
+        public string? VideoMimeType { get; set; }
+
         public List<UserCourseProfessorDto> Professors { get; set; } = new();
     }
 

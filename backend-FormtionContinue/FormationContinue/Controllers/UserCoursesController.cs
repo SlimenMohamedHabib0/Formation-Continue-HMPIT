@@ -52,14 +52,17 @@ namespace FormationContinue.Controllers
                     DatePublication = c.DatePublication,
                     CategoryId = c.CategoryId,
                     CategoryLibelle = c.Category.Libelle,
-                    NomFichierPdf = c.NomFichierPdf
+                    NomFichierPdf = c.NomFichierPdf,
+                    VideoFileName = c.VideoFileName,
+                    VideoPath = c.VideoPath,
+                    VideoMimeType = c.VideoMimeType
                 })
                 .ToListAsync();
 
             return Ok(list);
         }
 
-       
+
         [HttpGet("{id:int}")]
         public async Task<ActionResult<UserCourseDetailsDto>> GetPublishedById(int id)
         {
@@ -76,14 +79,17 @@ namespace FormationContinue.Controllers
                     CategoryId = c.CategoryId,
                     CategoryLibelle = c.Category.Libelle,
                     NomFichierPdf = c.NomFichierPdf,
+                    VideoFileName = c.VideoFileName,
+                    VideoPath = c.VideoPath,
+                    VideoMimeType = c.VideoMimeType,
                     Professors = c.CourseProfessors
-                        .Select(cp => new UserCourseProfessorDto
-                        {
-                            Id = cp.Professor.Id,
-                            FullName = cp.Professor.FullName,
-                            Email = cp.Professor.Email
-                        })
-                        .ToList()
+        .Select(cp => new UserCourseProfessorDto
+        {
+            Id = cp.Professor.Id,
+            FullName = cp.Professor.FullName,
+            Email = cp.Professor.Email
+        })
+        .ToList()
                 })
                 .FirstOrDefaultAsync();
 
@@ -92,6 +98,7 @@ namespace FormationContinue.Controllers
 
             return Ok(dto);
         }
+
 
         [HttpGet("mine")]
         [Authorize(Roles = "USER")]
@@ -140,15 +147,20 @@ namespace FormationContinue.Controllers
                     DateDecision = e.DateDecision,
 
                     DernierePageAtteinte = _context.Progress
-                        .Where(p => p.EnrollmentId == e.Id)
-                        .Select(p => p.DernierePageAtteinte)
-                        .FirstOrDefault(),
+        .Where(p => p.EnrollmentId == e.Id)
+        .Select(p => p.DernierePageAtteinte)
+        .FirstOrDefault(),
 
                     DateCompletion = _context.Progress
-                        .Where(p => p.EnrollmentId == e.Id)
-                        .Select(p => p.DateCompletion)
-                        .FirstOrDefault()
+        .Where(p => p.EnrollmentId == e.Id)
+        .Select(p => p.DateCompletion)
+        .FirstOrDefault(),
+
+                    VideoFileName = e.Course.VideoFileName,
+
+                    
                 })
+
                 .ToListAsync();
 
             return Ok(list);

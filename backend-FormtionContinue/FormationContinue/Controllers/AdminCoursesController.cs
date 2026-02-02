@@ -51,14 +51,15 @@ namespace FormationContinue.Controllers
                     CategoryId = c.CategoryId,
                     NomFichierPdf = c.NomFichierPdf,
                     Professors = c.CourseProfessors
-                        .Select(cp => new AdminCourseProfessorDto
-                        {
-                            Id = cp.Professor.Id,
-                            FullName = cp.Professor.FullName,
-                            Email = cp.Professor.Email
-                        })
-                        .ToList()
+        .Select(cp => new AdminCourseProfessorDto
+        {
+            Id = cp.Professor.Id,
+            FullName = cp.Professor.FullName,
+            Email = cp.Professor.Email
+        })
+        .ToList()
                 })
+
                 .ToListAsync();
 
             return Ok(courses);

@@ -1,4 +1,3 @@
-
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -26,7 +25,8 @@ type EnrollmentStatut = 'PENDING' | 'ACCEPTEE' | 'REFUSEE';
   styleUrl: './cours.css',
 })
 export class Cours implements OnInit, OnDestroy {
-  loading = true;
+  loadingPage = true;     
+   loadingCourses = false; 
   error: string | null = null;
 
   search = '';
@@ -42,8 +42,8 @@ export class Cours implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.sub.add(
-      this.search$.pipe(debounceTime(300), distinctUntilChanged()).subscribe(() => {
-        this.loadCourses();
+      this.search$.pipe(debounceTime(100), distinctUntilChanged()).subscribe(() => {
+        this.loadCourses(); 
       })
     );
 
@@ -55,27 +55,31 @@ export class Cours implements OnInit, OnDestroy {
   }
 
   loadAll(): void {
-    this.loading = true;
     this.error = null;
+    this.loadingPage = true;
 
-    this.loadCourses();
     this.loadMyEnrollments();
+    this.loadCourses(true);
   }
 
-  loadCourses(): void {
-    this.loading = true;
+  loadCourses(isFirstLoad = false): void {
     this.error = null;
+
+    if (isFirstLoad) this.loadingPage = true;
+    this.loadingCourses = true;
 
     const s = this.search.trim();
 
     this.srvc.getPublishedCourses(s || undefined).subscribe({
       next: (res) => {
         this.courses = (res ?? []) as ICourseCard[];
-        this.loading = false;
+        this.loadingCourses = false;
+        this.loadingPage = false;
       },
       error: () => {
         this.courses = [];
-        this.loading = false;
+        this.loadingCourses = false;
+        this.loadingPage = false;
         this.error = 'Impossible de charger les cours.';
       },
     });

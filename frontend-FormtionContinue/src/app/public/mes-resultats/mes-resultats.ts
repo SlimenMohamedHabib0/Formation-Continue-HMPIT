@@ -1,9 +1,11 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Subject, Subscription, debounceTime, distinctUntilChanged } from 'rxjs';
 import { PublicSrvc } from '../public-srvc';
 
 type AttemptStatus = 'REUSSI' | 'ECHOUE';
+type FilterStatus = '' | AttemptStatus;
 
 interface IUserAttempt {
   tentativeId: number;
@@ -14,8 +16,6 @@ interface IUserAttempt {
   statutTentative: AttemptStatus;
 }
 
-type FilterStatus = '' | AttemptStatus;
-
 @Component({
   selector: 'app-mes-resultats',
   standalone: true,
@@ -23,7 +23,7 @@ type FilterStatus = '' | AttemptStatus;
   templateUrl: './mes-resultats.html',
   styleUrl: './mes-resultats.css',
 })
-export class MesResultats implements OnInit {
+export class MesResultats implements OnInit, OnDestroy {
   loading = true;
   error: string | null = null;
 
@@ -33,10 +33,23 @@ export class MesResultats implements OnInit {
   items: IUserAttempt[] = [];
   view: IUserAttempt[] = [];
 
+  private search$ = new Subject<string>();
+  private sub = new Subscription();
+
   constructor(private srvc: PublicSrvc) {}
 
   ngOnInit(): void {
+    this.sub.add(
+      this.search$
+        .pipe(debounceTime(200), distinctUntilChanged())
+        .subscribe(() => this.load())
+    );
+
     this.load();
+  }
+
+  ngOnDestroy(): void {
+    this.sub.unsubscribe();
   }
 
   load(): void {
@@ -61,7 +74,7 @@ export class MesResultats implements OnInit {
   }
 
   onSearchChange(): void {
-    this.load();
+    this.search$.next(this.search);
   }
 
   onFilterChange(): void {
@@ -72,7 +85,6 @@ export class MesResultats implements OnInit {
     const st = this.statut;
 
     let arr = [...(this.items ?? [])];
-
     if (st) arr = arr.filter((x) => x.statutTentative === st);
 
     arr.sort((a, b) => {
@@ -89,8 +101,7 @@ export class MesResultats implements OnInit {
   }
 
   badgeClass(st: AttemptStatus): string {
-    if (st === 'REUSSI') return 'badge bg-green-lt';
-    return 'badge bg-red-lt';
+    return st === 'REUSSI' ? 'badge bg-green-lt' : 'badge bg-red-lt';
   }
 
   labelStatus(st: AttemptStatus): string {

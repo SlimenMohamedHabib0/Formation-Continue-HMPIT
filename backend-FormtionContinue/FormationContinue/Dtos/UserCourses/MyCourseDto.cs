@@ -16,5 +16,8 @@
 
         public int DernierePageAtteinte { get; set; }
         public DateTime? DateCompletion { get; set; }
+
+        public string? VideoFileName { get; set; }
+        public int? LastVideoTimeSeconds { get; set; }
     }
 }

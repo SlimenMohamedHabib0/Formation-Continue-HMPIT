@@ -41,6 +41,7 @@ export interface AdminDashboardDto {
   topCategoriesByEnrollments: CountItemDto[];
 }
 
+
 export interface CreateProfessorDto {
   fullName?: string;
   email?: string;
@@ -65,6 +66,44 @@ export interface UpdateUserDto {
 
   [key: string]: any;
 }
+export interface CourseCountItemDto {
+  courseId: number;
+  courseTitre: string;
+  count: number;
+}
+
+export interface CourseSuccessItemDto {
+  courseId: number;
+  courseTitre: string;
+  attempts: number;
+  passed: number;
+  failed: number;
+  successRatePercent: number;
+}
+
+export interface ProfessorDashboardDto {
+  professorName: string;
+
+  nbMyCoursesTotal: number;
+  nbMyCoursesDraft: number;
+  nbMyCoursesPublished: number;
+
+  nbEnrollmentsTotal: number;
+  nbEnrollmentsPending: number;
+  nbEnrollmentsAccepted: number;
+  nbEnrollmentsRefused: number;
+
+  nbAttemptsTotal: number;
+  nbAttemptsPassed: number;
+  nbAttemptsFailed: number;
+  averageNote: number | null;
+  successRatePercent: number;
+
+  topCoursesByEnrollments: CourseCountItemDto[];
+  successRateByCourse: CourseSuccessItemDto[];
+}
+
+
 
 @Injectable({
   providedIn: 'root',
@@ -225,6 +264,11 @@ export class AdminSrvc {
   deleteCategory(id: number) {
     return this.http.delete<void>(
       `${environment.apiUrl}/categories/${id}`
+    );
+  }
+  getProfessorDashboard(professorId: number): Observable<ProfessorDashboardDto> {
+    return this.http.get<ProfessorDashboardDto>(
+      `${environment.apiUrl}/admin/professors/${professorId}/dashboard`
     );
   }
   

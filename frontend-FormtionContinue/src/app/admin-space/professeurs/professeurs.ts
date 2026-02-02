@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AdminSrvc } from '../admin-srvc';
 import { Iprofesseur } from '../interfaces/iprofesseur';
+import { Router } from '@angular/router';
 import { Subject, Subscription, debounceTime, distinctUntilChanged } from 'rxjs';
 
 type Mode = 'list' | 'create' | 'edit';
@@ -37,7 +38,8 @@ export class Professeurs implements OnInit, OnDestroy {
   private search$ = new Subject<string>();
   private sub = new Subscription();
 
-  constructor(private adminSrvc: AdminSrvc) {}
+  constructor(private adminSrvc: AdminSrvc, private router: Router) {}
+
 
   ngOnInit(): void {
     this.load();
@@ -176,4 +178,9 @@ export class Professeurs implements OnInit, OnDestroy {
       },
     });
   }
+  goToDashboard(p: Iprofesseur): void {
+    this.resetMessages();
+    this.router.navigate(['/admin/professeurs', p.id, 'dashboard']);
+  }
+  
 }

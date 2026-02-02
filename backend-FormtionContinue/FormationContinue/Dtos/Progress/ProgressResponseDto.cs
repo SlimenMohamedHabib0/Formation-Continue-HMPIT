@@ -6,5 +6,6 @@
         public int EnrollmentId { get; set; }
         public int DernierePageAtteinte { get; set; }
         public DateTime? DateCompletion { get; set; }
+
     }
 }

@@ -12,7 +12,6 @@ namespace FormationContinue.Models
 
         [Required]
         public int DernierePageAtteinte { get; set; } = 0;
-
         public DateTime? DateCompletion { get; set; }
     }
 }

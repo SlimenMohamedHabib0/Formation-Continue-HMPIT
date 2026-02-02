@@ -14,10 +14,8 @@ export class PublicSrvc {
 
   getMyAttempts(search?: string, courseId?: number) {
     const params: string[] = [];
-
     const s = search?.trim();
     if (s) params.push(`search=${encodeURIComponent(s)}`);
-
     if (courseId !== undefined && courseId !== null) params.push(`courseId=${courseId}`);
 
     const url =
@@ -30,7 +28,6 @@ export class PublicSrvc {
 
   getPublishedCourses(search?: string) {
     const params: string[] = [];
-
     const s = search?.trim();
     if (s) params.push(`search=${encodeURIComponent(s)}`);
 
@@ -48,10 +45,8 @@ export class PublicSrvc {
 
   getMyEnrollments(search?: string, statut?: string) {
     const params: string[] = [];
-
     const s = search?.trim();
     if (s) params.push(`search=${encodeURIComponent(s)}`);
-
     const st = statut?.trim();
     if (st) params.push(`statut=${encodeURIComponent(st)}`);
 
@@ -63,13 +58,26 @@ export class PublicSrvc {
     return this.http.get<any[]>(url);
   }
 
+  getCourseById(courseId: number) {
+    return this.http.get<any>(`${environment.apiUrl}/user-courses/${courseId}`);
+  }
+
   getCoursePdfBlob(courseId: number) {
     return this.http.get(`${environment.apiUrl}/user-courses/${courseId}/pdf`, {
       responseType: 'blob',
     });
   }
-
+  getCourseVideoUrl(courseId: number): string {
+    return `${environment.apiUrl}/user-courses/${courseId}/video`;
+  }
   
+
+  getCourseVideoBlob(courseId: number) {
+    return this.http.get(`${environment.apiUrl}/user-courses/${courseId}/video`, {
+      responseType: 'blob',
+    });
+  }
+
   getProgress(courseId: number) {
     return this.http.get<any>(`${environment.apiUrl}/courses/${courseId}/progress`);
   }
@@ -84,9 +92,8 @@ export class PublicSrvc {
   getQcm(courseId: number) {
     return this.http.get<any>(`${environment.apiUrl}/user-courses/${courseId}/qcm`);
   }
-  
+
   submitQcm(courseId: number, payload: any) {
     return this.http.post<any>(`${environment.apiUrl}/user-courses/${courseId}/qcm/submit`, payload);
   }
-  
 }

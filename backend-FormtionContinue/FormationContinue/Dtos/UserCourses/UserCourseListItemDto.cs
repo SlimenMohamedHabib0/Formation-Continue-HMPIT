@@ -12,5 +12,9 @@
         public string CategoryLibelle { get; set; } = null!;
 
         public string? NomFichierPdf { get; set; }
+
+        public string? VideoFileName { get; set; }
+        public string? VideoPath { get; set; }
+        public string? VideoMimeType { get; set; }
     }
 }

@@ -1,117 +1,123 @@
-<div *ngIf="loading" class="text-center py-6">
+<div class="ins-wrap">
+  <div class="page-header mb-3">
+    <div>
+      <div class="page-title">Mes inscriptions</div>
+      <div class="page-subtitle">Suivi de vos demandes</div>
+    </div>
+
+    <div class="search-box">
+      <input
+        class="form-control"
+        placeholder="Rechercher un cours..."
+        [(ngModel)]="search"
+        (input)="onSearchInput()"
+      />
+    </div>
+  </div>
+
+  <div *ngIf="error" class="alert alert-danger">{{ error }}</div>
+
+  <div *ngIf="loading" class="text-center py-4">
     <div class="spinner-border text-primary"></div>
   </div>
-  
-  <div *ngIf="!loading" class="ins-wrap">
-    <div class="page-header mb-3">
-      <div>
-        <div class="page-title">Mes inscriptions</div>
-        <div class="page-subtitle">Suivi de vos demandes</div>
-      </div>
-  
-      <div class="search-box">
-        <input
-          class="form-control"
-          placeholder="Rechercher un cours..."
-          [(ngModel)]="search"
-          (input)="onSearchInput()"
-        />
+
+  <div class="row row-cards" *ngIf="!loading">
+    <!-- ACCEPTEES -->
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Acceptées</div>
+          <div class="text-secondary">{{ accepted.length }} résultat(s)</div>
+        </div>
+        <div class="card-body">
+          <div *ngIf="!accepted.length" class="text-secondary">Aucun résultat.</div>
+
+          <div class="enroll-grid" *ngIf="accepted.length">
+            <div class="card enroll-card" *ngFor="let e of accepted">
+              <div class="card-body">
+                <div class="enroll-top">
+                  <div class="enroll-title">{{ e.courseTitre }}</div>
+                  <span class="badge bg-green-lt">ACCEPTEE</span>
+                </div>
+
+                <div class="enroll-meta text-secondary">
+                  Demande: {{ e.dateDemande | date:'dd/MM/yyyy' }}
+                  <span *ngIf="e.dateDecision">
+                    • Décision: {{ e.dateDecision | date:'dd/MM/yyyy' }}
+                  </span>
+                </div>
+
+                <div class="enroll-actions">
+                  <button class="btn btn-primary" (click)="openCourse(e.courseId)">Ouvrir</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
       </div>
     </div>
-  
-    <div *ngIf="error" class="alert alert-danger">{{ error }}</div>
-  
-    <div class="row row-cards">
-      <div class="col-12">
-        <div class="card">
-          <div class="card-header">
-            <div class="card-title">Acceptées</div>
-            <div class="text-secondary">{{ accepted.length }} résultat(s)</div>
-          </div>
-          <div class="card-body">
-            <div *ngIf="!accepted.length" class="text-secondary">Aucun résultat.</div>
-  
-            <div class="enroll-grid" *ngIf="accepted.length">
-              <div class="card enroll-card" *ngFor="let e of accepted">
-                <div class="card-body">
-                  <div class="enroll-top">
-                    <div class="enroll-title">{{ e.courseTitre }}</div>
-                    <span class="badge bg-green-lt">ACCEPTEE</span>
-                  </div>
-  
-                  <div class="enroll-meta text-secondary">
-                    Demande: {{ e.dateDemande | date:'dd/MM/yyyy' }}
-                    <span *ngIf="e.dateDecision"> • Décision: {{ e.dateDecision | date:'dd/MM/yyyy' }}</span>
-                  </div>
-  
-                  <div class="enroll-actions">
-                    <button class="btn btn-primary" (click)="openCourse(e.courseId)">Ouvrir</button>
-                  </div>
+
+    <!-- PENDING -->
+    <div class="col-12 mt-3">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">En attente</div>
+          <div class="text-secondary">{{ pending.length }} résultat(s)</div>
+        </div>
+        <div class="card-body">
+          <div *ngIf="!pending.length" class="text-secondary">Aucun résultat.</div>
+
+          <div class="enroll-grid" *ngIf="pending.length">
+            <div class="card enroll-card" *ngFor="let e of pending">
+              <div class="card-body">
+                <div class="enroll-top">
+                  <div class="enroll-title">{{ e.courseTitre }}</div>
+                  <span class="badge bg-yellow-lt">PENDING</span>
+                </div>
+
+                <div class="enroll-meta text-secondary">
+                  Demande: {{ e.dateDemande | date:'dd/MM/yyyy' }}
                 </div>
               </div>
             </div>
-  
           </div>
+
         </div>
       </div>
-  
-      <div class="col-12 mt-3">
-        <div class="card">
-          <div class="card-header">
-            <div class="card-title">En attente</div>
-            <div class="text-secondary">{{ pending.length }} résultat(s)</div>
-          </div>
-          <div class="card-body">
-            <div *ngIf="!pending.length" class="text-secondary">Aucun résultat.</div>
-  
-            <div class="enroll-grid" *ngIf="pending.length">
-              <div class="card enroll-card" *ngFor="let e of pending">
-                <div class="card-body">
-                  <div class="enroll-top">
-                    <div class="enroll-title">{{ e.courseTitre }}</div>
-                    <span class="badge bg-yellow-lt">PENDING</span>
-                  </div>
-  
-                  <div class="enroll-meta text-secondary">
-                    Demande: {{ e.dateDemande | date:'dd/MM/yyyy' }}
-                  </div>
-                </div>
-              </div>
-            </div>
-  
-          </div>
-        </div>
-      </div>
-  
-      <div class="col-12 mt-3">
-        <div class="card">
-          <div class="card-header">
-            <div class="card-title">Refusées</div>
-            <div class="text-secondary">{{ refused.length }} résultat(s)</div>
-          </div>
-          <div class="card-body">
-            <div *ngIf="!refused.length" class="text-secondary">Aucun résultat.</div>
-  
-            <div class="enroll-grid" *ngIf="refused.length">
-              <div class="card enroll-card" *ngFor="let e of refused">
-                <div class="card-body">
-                  <div class="enroll-top">
-                    <div class="enroll-title">{{ e.courseTitre }}</div>
-                    <span class="badge bg-red-lt">REFUSEE</span>
-                  </div>
-  
-                  <div class="enroll-meta text-secondary">
-                    Demande: {{ e.dateDemande | date:'dd/MM/yyyy' }}
-                    <span *ngIf="e.dateDecision"> • Décision: {{ e.dateDecision | date:'dd/MM/yyyy' }}</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-  
-          </div>
-        </div>
-      </div>
-  
     </div>
+
+    <!-- REFUSEES -->
+    <div class="col-12 mt-3">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Refusées</div>
+          <div class="text-secondary">{{ refused.length }} résultat(s)</div>
+        </div>
+        <div class="card-body">
+          <div *ngIf="!refused.length" class="text-secondary">Aucun résultat.</div>
+
+          <div class="enroll-grid" *ngIf="refused.length">
+            <div class="card enroll-card" *ngFor="let e of refused">
+              <div class="card-body">
+                <div class="enroll-top">
+                  <div class="enroll-title">{{ e.courseTitre }}</div>
+                  <span class="badge bg-red-lt">REFUSEE</span>
+                </div>
+
+                <div class="enroll-meta text-secondary">
+                  Demande: {{ e.dateDemande | date:'dd/MM/yyyy' }}
+                  <span *ngIf="e.dateDecision">
+                    • Décision: {{ e.dateDecision | date:'dd/MM/yyyy' }}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
   </div>
-  
+</div>

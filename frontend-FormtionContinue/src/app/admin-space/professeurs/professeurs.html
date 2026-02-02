@@ -1,169 +1,213 @@
 <div class="page-body admin-prof">
-    <div class="page-header mb-4">
-      <div>
-        <h2 class="page-title">Gestion des professeurs</h2>
-        <div class="text-secondary">
-            Ajout, Recherche, modification et suppression des professeurs.
-        </div>
+  <div class="page-header mb-4">
+    <div>
+      <h2 class="page-title">Gestion des professeurs</h2>
+      <div class="text-secondary">
+        Ajout, Recherche, modification et suppression des professeurs.
       </div>
-  
-      <div class="page-actions">
-        <button class="btn btn-primary" type="button" (click)="openCreate()">
-          Ajouter un professeur
+    </div>
+
+    <div class="page-actions">
+      <button class="btn btn-primary" type="button" (click)="openCreate()">
+        Ajouter un professeur
+      </button>
+    </div>
+  </div>
+
+  <div *ngIf="error" class="alert alert-danger mb-3">{{ error }}</div>
+  <div *ngIf="success" class="alert alert-success mb-3">{{ success }}</div>
+
+  <div *ngIf="mode === 'list'" class="card">
+    <div class="card-body">
+      <div class="d-flex gap-2 flex-wrap align-items-center">
+        <div class="search-box">
+          <input
+            class="form-control"
+            type="text"
+            [(ngModel)]="search"
+            placeholder="Rechercher (nom ou email)…"
+            (input)="onSearchInput()"
+          />
+        </div>
+
+        <button
+          class="btn btn-outline-secondary"
+          type="button"
+          (click)="search=''; onSearchInput()"
+        >
+          Réinitialiser
         </button>
       </div>
     </div>
-  
-    <div *ngIf="error" class="alert alert-danger mb-3">{{ error }}</div>
-    <div *ngIf="success" class="alert alert-success mb-3">{{ success }}</div>
-  
-    <div *ngIf="mode === 'list'" class="card">
-      <div class="card-body">
-        <div class="d-flex gap-2 flex-wrap align-items-center">
-          <div class="search-box">
+
+    <div class="table-responsive">
+      <table class="table table-vcenter card-table">
+        <thead>
+          <tr>
+            <th>Nom</th>
+            <th>Email</th>
+            <th class="text-end">Actions</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr *ngIf="loading">
+            <td colspan="3" class="text-center py-5">
+              <div class="spinner-border text-primary"></div>
+            </td>
+          </tr>
+
+          <tr *ngIf="!loading && !professeurs.length">
+            <td colspan="3" class="text-center text-secondary py-4">
+              Aucun professeur trouvé.
+            </td>
+          </tr>
+
+          <tr *ngFor="let p of professeurs">
+            <td class="fw-semibold">{{ p.fullName }}</td>
+            <td>{{ p.email }}</td>
+            <td class="text-end">
+              <!-- ✅ NEW BUTTON -->
+              <button
+                class="btn btn-sm btn-outline-success me-2"
+                type="button"
+                (click)="goToDashboard(p)"
+                title="Voir les statistiques"
+              >
+                Voir stats
+              </button>
+
+              <button
+                class="btn btn-sm btn-outline-primary me-2"
+                type="button"
+                (click)="openEdit(p)"
+              >
+                Modifier
+              </button>
+
+              <button
+                class="btn btn-sm btn-outline-danger"
+                type="button"
+                (click)="delete(p.id)"
+              >
+                Supprimer
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div *ngIf="mode === 'create'" class="card">
+    <div class="card-header">
+      <div class="card-title">Ajouter un professeur</div>
+      <div class="ms-auto">
+        <button class="btn btn-outline-secondary" type="button" (click)="cancel()">
+          Fermer
+        </button>
+      </div>
+    </div>
+
+    <div class="card-body">
+      <div class="row g-3">
+        <div class="col-md-6">
+          <label class="form-label">Nom complet</label>
+          <input class="form-control" type="text" [(ngModel)]="form.fullName" />
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label">Email</label>
+          <input
+            class="form-control"
+            type="email"
+            autocomplete="off"
+            [(ngModel)]="form.email"
+          />
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label">Mot de passe</label>
+          <div class="input-group">
             <input
               class="form-control"
-              type="text"
-              [(ngModel)]="search"
-              placeholder="Rechercher (nom ou email)…"
-              (input)="onSearchInput()"
+              [type]="showPassword ? 'text' : 'password'"
+              autocomplete="new-password"
+              [(ngModel)]="form.password"
             />
-          </div>
-  
-          <button class="btn btn-outline-secondary" type="button" (click)="search=''; onSearchInput()">
-            Réinitialiser
-          </button>
-        </div>
-      </div>
-  
-      <div class="table-responsive">
-        <table class="table table-vcenter card-table">
-          <thead>
-            <tr>
-              <th>Nom</th>
-              <th>Email</th>
-              <th class="text-end">Actions</th>
-            </tr>
-          </thead>
-  
-          <tbody>
-            <tr *ngIf="loading">
-              <td colspan="3" class="text-center py-5">
-                <div class="spinner-border text-primary"></div>
-              </td>
-            </tr>
-  
-            <tr *ngIf="!loading && !professeurs.length">
-              <td colspan="3" class="text-center text-secondary py-4">
-                Aucun professeur trouvé.
-              </td>
-            </tr>
-  
-            <tr *ngFor="let p of professeurs">
-              <td class="fw-semibold">{{ p.fullName }}</td>
-              <td>{{ p.email }}</td>
-              <td class="text-end">
-                <button class="btn btn-sm btn-outline-primary me-2" type="button" (click)="openEdit(p)">
-                  Modifier
-                </button>
-                <button class="btn btn-sm btn-outline-danger" type="button" (click)="delete(p.id)">
-                  Supprimer
-                </button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-  
-    <div *ngIf="mode === 'create'" class="card">
-      <div class="card-header">
-        <div class="card-title">Ajouter un professeur</div>
-        <div class="ms-auto">
-          <button class="btn btn-outline-secondary" type="button" (click)="cancel()">Fermer</button>
-        </div>
-      </div>
-  
-      <div class="card-body">
-        <div class="row g-3">
-          <div class="col-md-6">
-            <label class="form-label">Nom complet</label>
-            <input class="form-control" type="text" [(ngModel)]="form.fullName" />
-          </div>
-  
-          <div class="col-md-6">
-            <label class="form-label">Email</label>
-            <input class="form-control" type="email" autocomplete="off" [(ngModel)]="form.email" />
-          </div>
-  
-          <div class="col-md-6">
-            <label class="form-label">Mot de passe</label>
-            <div class="input-group">
-                <input class="form-control" [type]="showPassword ? 'text' : 'password'" autocomplete="new-password" [(ngModel)]="form.password" />
 
-              <button class="btn btn-outline-secondary" type="button" (click)="showPassword = !showPassword">
-                {{ showPassword ? 'Masquer' : 'Afficher' }}
-              </button>
-            </div>
+            <button
+              class="btn btn-outline-secondary"
+              type="button"
+              (click)="showPassword = !showPassword"
+            >
+              {{ showPassword ? 'Masquer' : 'Afficher' }}
+            </button>
           </div>
-        </div>
-  
-        <div class="mt-4 d-flex gap-2">
-          <button class="btn btn-primary" type="button" [disabled]="loading" (click)="create()">
-            Enregistrer
-          </button>
-          <button class="btn btn-outline-secondary" type="button" (click)="cancel()">
-            Annuler
-          </button>
         </div>
       </div>
-    </div>
-  
-    <div *ngIf="mode === 'edit'" class="card">
-      <div class="card-header">
-        <div class="card-title">Modifier le professeur</div>
-        <div class="ms-auto">
-          <button class="btn btn-outline-secondary" type="button" (click)="cancel()">Fermer</button>
-        </div>
-      </div>
-  
-      <div class="card-body">
-        <div class="row g-3">
-          <div class="col-md-6">
-            <label class="form-label">Nom complet</label>
-            <input class="form-control" type="text" [(ngModel)]="form.fullName" />
-          </div>
-  
-          <div class="col-md-6">
-            <label class="form-label">Email</label>
-            <input class="form-control" type="email" [(ngModel)]="form.email" />
-          </div>
-  
-          <div class="col-md-6">
-            <label class="form-label">Nouveau mot de passe (optionnel)</label>
-            <div class="input-group">
-              <input
-                class="form-control"
-                [type]="showPassword ? 'text' : 'password'"
-                [(ngModel)]="form.password"
-              />
-              <button class="btn btn-outline-secondary" type="button" (click)="showPassword = !showPassword">
-                {{ showPassword ? 'Masquer' : 'Afficher' }}
-              </button>
-            </div>
-            <div class="form-hint">Laisser vide pour ne pas changer le mot de passe.</div>
-          </div>
-        </div>
-  
-        <div class="mt-4 d-flex gap-2">
-          <button class="btn btn-primary" type="button" [disabled]="loading" (click)="update()">
-            Enregistrer
-          </button>
-          <button class="btn btn-outline-secondary" type="button" (click)="cancel()">
-            Annuler
-          </button>
-        </div>
+
+      <div class="mt-4 d-flex gap-2">
+        <button class="btn btn-primary" type="button" [disabled]="loading" (click)="create()">
+          Enregistrer
+        </button>
+        <button class="btn btn-outline-secondary" type="button" (click)="cancel()">
+          Annuler
+        </button>
       </div>
     </div>
   </div>
-  
+
+  <div *ngIf="mode === 'edit'" class="card">
+    <div class="card-header">
+      <div class="card-title">Modifier le professeur</div>
+      <div class="ms-auto">
+        <button class="btn btn-outline-secondary" type="button" (click)="cancel()">
+          Fermer
+        </button>
+      </div>
+    </div>
+
+    <div class="card-body">
+      <div class="row g-3">
+        <div class="col-md-6">
+          <label class="form-label">Nom complet</label>
+          <input class="form-control" type="text" [(ngModel)]="form.fullName" />
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label">Email</label>
+          <input class="form-control" type="email" [(ngModel)]="form.email" />
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label">Nouveau mot de passe (optionnel)</label>
+          <div class="input-group">
+            <input
+              class="form-control"
+              [type]="showPassword ? 'text' : 'password'"
+              [(ngModel)]="form.password"
+            />
+            <button
+              class="btn btn-outline-secondary"
+              type="button"
+              (click)="showPassword = !showPassword"
+            >
+              {{ showPassword ? 'Masquer' : 'Afficher' }}
+            </button>
+          </div>
+          <div class="form-hint">Laisser vide pour ne pas changer le mot de passe.</div>
+        </div>
+      </div>
+
+      <div class="mt-4 d-flex gap-2">
+        <button class="btn btn-primary" type="button" [disabled]="loading" (click)="update()">
+          Enregistrer
+        </button>
+        <button class="btn btn-outline-secondary" type="button" (click)="cancel()">
+          Annuler
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

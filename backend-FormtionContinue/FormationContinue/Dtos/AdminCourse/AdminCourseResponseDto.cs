@@ -9,6 +9,9 @@
         public int CategoryId { get; set; }
         public string? NomFichierPdf { get; set; }
 
+        public string? VideoFileName { get; set; }
+        public string? VideoMimeType { get; set; }
+
         public List<AdminCourseProfessorDto> Professors { get; set; } = new();
     }
 

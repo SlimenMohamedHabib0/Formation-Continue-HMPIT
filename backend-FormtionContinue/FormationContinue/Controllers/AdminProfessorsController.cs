@@ -1,5 +1,6 @@
 ﻿using FormationContinue.Data;
 using FormationContinue.Dtos.Admin;
+using FormationContinue.Dtos.ProfessorStats;
 using FormationContinue.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -193,5 +194,136 @@ namespace FormationContinue.Controllers
 
             return NoContent();
         }
+        [HttpGet("professors/{id:int}/dashboard")]
+        public async Task<ActionResult<ProfessorDashboardDto>> GetProfessorDashboard(int id)
+        {
+            var profCount = await _context.Users
+    .AsNoTracking()
+    .CountAsync(u => u.Id == id && u.Role == "PROFESSOR");
+
+            if (profCount == 0)
+                return NotFound("Professeur introuvable.");
+
+
+           
+            var myCourseIds = await _context.CourseProfessors
+                .AsNoTracking()
+                .Where(cp => cp.ProfessorId == id)
+                .Select(cp => cp.CourseId)
+                .Distinct()
+                .ToListAsync();
+
+            if (myCourseIds.Count == 0)
+            {
+                return Ok(new ProfessorDashboardDto
+                {
+                    NbMyCoursesTotal = 0,
+                    NbMyCoursesDraft = 0,
+                    NbMyCoursesPublished = 0,
+
+                    NbEnrollmentsTotal = 0,
+                    NbEnrollmentsPending = 0,
+                    NbEnrollmentsAccepted = 0,
+                    NbEnrollmentsRefused = 0,
+
+                    NbAttemptsTotal = 0,
+                    NbAttemptsPassed = 0,
+                    NbAttemptsFailed = 0,
+                    AverageNote = null,
+                    SuccessRatePercent = 0,
+
+                    TopCoursesByEnrollments = new List<CourseCountItemDto>(),
+                    SuccessRateByCourse = new List<CourseSuccessItemDto>()
+                });
+            }
+
+            var nbDraft = await _context.Courses.CountAsync(c => myCourseIds.Contains(c.Id) && c.Etat == "DRAFT");
+            var nbPublished = await _context.Courses.CountAsync(c => myCourseIds.Contains(c.Id) && c.Etat == "PUBLISHED");
+
+            var nbEnrollTotal = await _context.Enrollments.CountAsync(e => myCourseIds.Contains(e.CourseId));
+            var nbEnrollPending = await _context.Enrollments.CountAsync(e => myCourseIds.Contains(e.CourseId) && e.Statut == "PENDING");
+            var nbEnrollAccepted = await _context.Enrollments.CountAsync(e => myCourseIds.Contains(e.CourseId) && e.Statut == "ACCEPTEE");
+            var nbEnrollRefused = await _context.Enrollments.CountAsync(e => myCourseIds.Contains(e.CourseId) && e.Statut == "REFUSEE");
+
+            var nbAttempts = await _context.TentativesQcm.CountAsync(t => myCourseIds.Contains(t.CourseId));
+            var nbPassed = await _context.TentativesQcm.CountAsync(t => myCourseIds.Contains(t.CourseId) && t.StatutTentative == "REUSSI");
+            var nbFailed = await _context.TentativesQcm.CountAsync(t => myCourseIds.Contains(t.CourseId) && t.StatutTentative == "ECHOUE");
+
+            var avgNote = await _context.TentativesQcm
+                .Where(t => myCourseIds.Contains(t.CourseId))
+                .Select(t => (double?)t.NoteSur20)
+                .AverageAsync();
+
+            var successRate = nbAttempts == 0 ? 0 : (double)nbPassed * 100.0 / nbAttempts;
+            var professorName = await _context.Users
+    .Where(u => u.Id == id)
+    .Select(u => u.FullName)
+    .FirstAsync();
+            var topCoursesByEnrollments = await _context.Enrollments
+    .AsNoTracking()
+    .Where(e => myCourseIds.Contains(e.CourseId))
+    .GroupBy(e => new { e.CourseId, e.Course.Titre })
+    .Select(g => new CourseCountItemDto
+    {
+        CourseId = g.Key.CourseId,
+        CourseTitre = g.Key.Titre,
+        Count = g.Count()
+    })
+    .OrderByDescending(x => x.Count)
+    .Take(10)
+    .ToListAsync();
+
+            var successByCourseRaw = await _context.TentativesQcm
+                .AsNoTracking()
+                .Where(t => myCourseIds.Contains(t.CourseId))
+                .GroupBy(t => new { t.CourseId, t.Course.Titre })
+                .Select(g => new
+                {
+                    g.Key.CourseId,
+                    g.Key.Titre,
+                    Attempts = g.Count(),
+                    Passed = g.Count(x => x.StatutTentative == "REUSSI"),
+                    Failed = g.Count(x => x.StatutTentative == "ECHOUE")
+                })
+                .ToListAsync();
+
+            var successRateByCourse = successByCourseRaw
+                .Select(x => new CourseSuccessItemDto
+                {
+                    CourseId = x.CourseId,
+                    CourseTitre = x.Titre,
+                    Attempts = x.Attempts,
+                    Passed = x.Passed,
+                    Failed = x.Failed,
+                    SuccessRatePercent = x.Attempts == 0 ? 0 : (double)x.Passed * 100.0 / x.Attempts
+                })
+                .OrderByDescending(x => x.Attempts)
+                .Take(10)
+                .ToList();
+
+
+            return Ok(new ProfessorDashboardDto
+            {
+                NbMyCoursesTotal = myCourseIds.Count,
+                NbMyCoursesDraft = nbDraft,
+                NbMyCoursesPublished = nbPublished,
+
+                NbEnrollmentsTotal = nbEnrollTotal,
+                NbEnrollmentsPending = nbEnrollPending,
+                NbEnrollmentsAccepted = nbEnrollAccepted,
+                NbEnrollmentsRefused = nbEnrollRefused,
+
+                NbAttemptsTotal = nbAttempts,
+                NbAttemptsPassed = nbPassed,
+                NbAttemptsFailed = nbFailed,
+                AverageNote = avgNote,
+                SuccessRatePercent = successRate,
+
+                TopCoursesByEnrollments = topCoursesByEnrollments,
+                SuccessRateByCourse = successRateByCourse
+            });
+
+        }
+
     }
 }
