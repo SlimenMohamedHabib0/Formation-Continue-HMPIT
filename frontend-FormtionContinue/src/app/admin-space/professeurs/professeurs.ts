@@ -1,13 +1,12 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { AdminSrvc } from '../admin-srvc';
+import { AdminSrvc, IService, IStatut } from '../admin-srvc';
 import { Iprofesseur } from '../interfaces/iprofesseur';
 import { Router } from '@angular/router';
 import { Subject, Subscription, debounceTime, distinctUntilChanged } from 'rxjs';
 
 type Mode = 'list' | 'create' | 'edit';
-
 
 @Component({
   selector: 'app-professeurs',
@@ -18,9 +17,11 @@ type Mode = 'list' | 'create' | 'edit';
 })
 export class Professeurs implements OnInit, OnDestroy {
   professeurs: Iprofesseur[] = [];
+  services: IService[] = [];
+  statuts: IStatut[] = [];
+
   loading = true;
   mode: Mode = 'list';
-
   search = '';
 
   form = {
@@ -28,29 +29,27 @@ export class Professeurs implements OnInit, OnDestroy {
     fullName: '',
     email: '',
     password: '',
+    serviceId: 0,
+    statutId: 0,
   };
 
   showPassword = false;
-
   error: string | null = null;
   success: string | null = null;
 
   private search$ = new Subject<string>();
   private sub = new Subscription();
 
-  constructor(private adminSrvc: AdminSrvc, private router: Router) {}
-
+  constructor(private admin: AdminSrvc, private router: Router) {}
 
   ngOnInit(): void {
     this.load();
+    this.admin.getServices().subscribe(r => (this.services = r));
+    this.admin.getStatuts().subscribe(r => (this.statuts = r));
 
     this.sub.add(
-      this.search$
-        .pipe(debounceTime(10), distinctUntilChanged())
-        .subscribe((s) => {
-          this.search = s;
-          this.load();
-        })
+      this.search$.pipe(debounceTime(300), distinctUntilChanged())
+        .subscribe(() => this.load())
     );
   }
 
@@ -60,127 +59,73 @@ export class Professeurs implements OnInit, OnDestroy {
 
   load(): void {
     this.loading = true;
-    this.error = null;
-
-    const s = this.search.trim() ? this.search.trim() : undefined;
-
-    this.adminSrvc.getProfessors(s).subscribe({
-      next: (res) => {
-        this.professeurs = res;
-        this.loading = false;
-      },
-      error: () => {
-        this.loading = false;
-        this.error = 'Impossible de charger la liste des professeurs.';
-      },
+    this.admin.getProfessors(this.search || undefined).subscribe({
+      next: r => { this.professeurs = r; this.loading = false; },
+      error: () => { this.loading = false; this.error = 'Chargement impossible.'; },
     });
   }
 
-  onSearchInput(): void {
+  onSearchInput() {
     this.search$.next(this.search);
   }
 
-  resetMessages(): void {
-    this.error = null;
-    this.success = null;
-  }
-
-  openCreate(): void {
-    this.resetMessages();
+  openCreate() {
     this.mode = 'create';
-    this.showPassword = false;
-    this.form = { id: 0, fullName: '', email: '', password: '' };
+    this.form = { id: 0, fullName: '', email: '', password: '', serviceId: 0, statutId: 0 };
   }
 
-  openEdit(p: Iprofesseur): void {
-    this.resetMessages();
+  openEdit(p: Iprofesseur) {
     this.mode = 'edit';
-
-    this.showPassword = false;
-    this.form = { id: p.id, fullName: p.fullName, email: p.email, password: '' };
+    this.form = {
+      id: p.id,
+      fullName: p.fullName,
+      email: p.email,
+      password: '',
+      serviceId: p.serviceId,
+      statutId: p.statutId,
+    };
   }
 
-  cancel(): void {
-    this.resetMessages();
+  cancel() {
     this.mode = 'list';
-    this.showPassword = false;
-    this.form = { id: 0, fullName: '', email: '', password: '' };
   }
 
-  create(): void {
-    this.resetMessages();
-
+  create() {
     const payload: any = {
-      fullName: this.form.fullName.trim(),
-      email: this.form.email.trim(),
+      fullName: this.form.fullName,
+      email: this.form.email,
+      serviceId: this.form.serviceId,
+      statutId: this.form.statutId,
     };
+    if (this.form.password) payload.password = this.form.password;
 
-    const pwd = this.form.password.trim();
-    if (pwd) payload.password = pwd;
-
-    this.loading = true;
-    this.adminSrvc.createProfessor(payload).subscribe({
-      next: () => {
-        this.loading = false;
-        this.success = 'Professeur créé avec succès.';
-        this.mode = 'list';
-        this.form = { id: 0, fullName: '', email: '', password: '' };
-        this.load();
-      },
-      error: () => {
-        this.loading = false;
-        this.error ='Erreur lors de la création du professeur.';
-      },
+    this.admin.createProfessor(payload).subscribe(() => {
+      this.mode = 'list';
+      this.load();
     });
   }
 
-  update(): void {
-    this.resetMessages();
-
+  update() {
     const payload: any = {
-      fullName: this.form.fullName.trim(),
-      email: this.form.email.trim(),
+      fullName: this.form.fullName,
+      email: this.form.email,
+      serviceId: this.form.serviceId,
+      statutId: this.form.statutId,
     };
+    if (this.form.password) payload.password = this.form.password;
 
-    const pwd = this.form.password.trim();
-    if (pwd) payload.password = pwd;
-
-    this.loading = true;
-    this.adminSrvc.updateProfessor(this.form.id, payload).subscribe({
-      next: () => {
-        this.loading = false;
-        this.success = 'Professeur modifié avec succès .';
-        this.mode = 'list';
-        this.form = { id: 0, fullName: '', email: '', password: '' };
-        this.load();
-      },
-      error: () => {
-        this.loading = false;
-        this.error ='Erreur lors de la modification du professeur.';
-      },
+    this.admin.updateProfessor(this.form.id, payload).subscribe(() => {
+      this.mode = 'list';
+      this.load();
     });
   }
 
-  delete(id: number): void {
-    this.resetMessages();
-    if (!confirm('Supprimer ce professeur ?')) return;
-
-    this.loading = true;
-    this.adminSrvc.deleteProfessor(id).subscribe({
-      next: () => {
-        this.loading = false;
-        this.success = 'Professeur supprimé.';
-        this.load();
-      },
-      error: () => {
-        this.loading = false;
-        this.error ='Impossible de supprimer ce professeur.';
-      },
-    });
+  delete(id: number) {
+    if (!confirm('Supprimer ?')) return;
+    this.admin.deleteProfessor(id).subscribe(() => this.load());
   }
-  goToDashboard(p: Iprofesseur): void {
-    this.resetMessages();
+
+  goToDashboard(p: Iprofesseur) {
     this.router.navigate(['/admin/professeurs', p.id, 'dashboard']);
   }
-  
 }

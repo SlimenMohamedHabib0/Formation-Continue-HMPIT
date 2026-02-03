@@ -47,6 +47,7 @@ namespace FormationContinue.Controllers
 
             var topCoursesByEnrollments = await _context.Enrollments
                 .AsNoTracking()
+                .Where(e => e.Statut == "ACCEPTEE")
                 .GroupBy(e => new { e.CourseId, e.Course.Titre })
                 .Select(g => new CountItemDto
                 {
@@ -73,10 +74,39 @@ namespace FormationContinue.Controllers
 
             var topCategoriesByEnrollments = await _context.Enrollments
                 .AsNoTracking()
+                .Where(e => e.Statut == "ACCEPTEE")
                 .GroupBy(e => new { e.Course.CategoryId, e.Course.Category.Libelle })
                 .Select(g => new CountItemDto
                 {
                     Id = g.Key.CategoryId,
+                    Label = g.Key.Libelle,
+                    Count = g.Count()
+                })
+                .OrderByDescending(x => x.Count)
+                .Take(10)
+                .ToListAsync();
+
+            var topServicesByEnrollments = await _context.Enrollments
+                .AsNoTracking()
+                .Where(e => e.Statut == "ACCEPTEE")
+                .GroupBy(e => new { e.User.ServiceId, e.User.Service.Libelle })
+                .Select(g => new CountItemDto
+                {
+                    Id = g.Key.ServiceId,
+                    Label = g.Key.Libelle,
+                    Count = g.Count()
+                })
+                .OrderByDescending(x => x.Count)
+                .Take(10)
+                .ToListAsync();
+
+            var topStatutsByEnrollments = await _context.Enrollments
+                .AsNoTracking()
+                .Where(e => e.Statut == "ACCEPTEE")
+                .GroupBy(e => new { e.User.StatutId, e.User.Statut.Libelle })
+                .Select(g => new CountItemDto
+                {
+                    Id = g.Key.StatutId,
                     Label = g.Key.Libelle,
                     Count = g.Count()
                 })
@@ -89,26 +119,24 @@ namespace FormationContinue.Controllers
                 NbUsers = nbUsers,
                 NbProfessors = nbProfessors,
                 NbAdmins = nbAdmins,
-
                 NbCategories = nbCategories,
                 NbCoursesTotal = nbCoursesTotal,
                 NbCoursesDraft = nbCoursesDraft,
                 NbCoursesPublished = nbCoursesPublished,
-
                 NbEnrollmentsTotal = nbEnrollTotal,
                 NbEnrollmentsPending = nbEnrollPending,
                 NbEnrollmentsAccepted = nbEnrollAccepted,
                 NbEnrollmentsRefused = nbEnrollRefused,
-
                 NbAttemptsTotal = nbAttempts,
                 NbAttemptsPassed = nbPassed,
                 NbAttemptsFailed = nbFailed,
                 AverageNote = avgNote,
                 SuccessRatePercent = successRate,
-
                 TopCoursesByEnrollments = topCoursesByEnrollments,
                 TopCategoriesByCourses = topCategoriesByCourses,
-                TopCategoriesByEnrollments = topCategoriesByEnrollments
+                TopCategoriesByEnrollments = topCategoriesByEnrollments,
+                TopServicesByEnrollments = topServicesByEnrollments,
+                TopStatutsByEnrollments = topStatutsByEnrollments
             });
         }
     }

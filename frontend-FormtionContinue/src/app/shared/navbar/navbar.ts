@@ -1,7 +1,8 @@
-import { Component } from '@angular/core';
+import { Component, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { AuthSrvc } from '../../auth/auth-srvc';
+import { Subscription } from 'rxjs';
 
 type NavItem = { label: string; path: string; exact?: boolean };
 
@@ -12,11 +13,21 @@ type NavItem = { label: string; path: string; exact?: boolean };
   templateUrl: './navbar.html',
   styleUrl: './navbar.css',
 })
-export class Navbar {
+export class Navbar implements OnDestroy {
   items: NavItem[] = [];
+  private sub = new Subscription();
 
   constructor(public auth: AuthSrvc, private router: Router) {
     this.buildMenu();
+    this.sub.add(
+      this.auth.me$.subscribe(() => {
+        this.buildMenu();
+      })
+    );
+  }
+
+  ngOnDestroy(): void {
+    this.sub.unsubscribe();
   }
 
   private buildMenu() {
@@ -28,6 +39,8 @@ export class Navbar {
         { label: 'Professeurs', path: '/admin/professeurs' },
         { label: 'Utilisateurs', path: '/admin/utilisateurs' },
         { label: 'Catégories', path: '/admin/categories' },
+        { label: 'Services', path: '/admin/services' },
+        { label: 'Statuts', path: '/admin/statuts' },
         { label: 'Supervision', path: '/admin/supervision' },
       ];
       return;
@@ -48,7 +61,6 @@ export class Navbar {
       { label: 'Mes inscriptions', path: '/public/mes-inscriptions' },
       { label: 'Mes résultats', path: '/public/mes-resultats' },
     ];
-    
   }
 
   trackByPath(_: number, item: NavItem) {
@@ -60,7 +72,6 @@ export class Navbar {
     if (role === 'ADMIN') this.router.navigate(['/admin']);
     else if (role === 'PROFESSOR') this.router.navigate(['/prof']);
     else this.router.navigate(['/public']);
-
   }
 
   logout() {

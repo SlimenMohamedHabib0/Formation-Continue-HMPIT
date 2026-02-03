@@ -22,6 +22,10 @@
   .status-box {
     min-width: 220px;
   }
+  .select-scroll {
+    max-height: 160px;
+    overflow-y: auto;
+  }
   
   .table-clean thead th,
   .table th {

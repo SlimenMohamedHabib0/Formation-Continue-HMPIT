@@ -172,111 +172,178 @@
     </div>
   
     <div class="row row-cards">
-        <!-- Top cours -->
-        <div class="col-lg-4">
-          <div class="card">
-            <div class="card-header">
-              <div>
-                <div class="card-title">Top cours</div>
-                <div class="card-subtitle">Par inscriptions</div>
-              </div>
-            </div>
-      
-            <div class="table-responsive">
-              <table class="table table-vcenter card-table table-clean table-compact">
-                <thead>
-                  <tr>
-                    <th style="width: 60px;">#</th>
-                    <th class="text-center">Cours</th>
-                    <th class="text-end" style="width: 148px;">Inscriptions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr *ngIf="!dashboard.topCoursesByEnrollments?.length">
-                    <td colspan="3" class="text-secondary px-4 py-4">Aucun résultat.</td>
-                  </tr>
-      
-                  <tr *ngFor="let item of dashboard.topCoursesByEnrollments; let i = index" class="row-hover">
-                    <td class="text-secondary fw-bold">{{ i + 1 }}</td>
-                    <td class="fw-semibold text-center"><span class="name-cell">{{ item.label }}</span></td>
-                    <td class="text-center fw-bold" style="width: 148px;">{{ item.count }}</td>
-                  </tr>
-                </tbody>
-              </table>
+      <div class="col-lg-4">
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <div class="card-title">Top cours</div>
+              <div class="card-subtitle">Par inscriptions</div>
             </div>
           </div>
-        </div>
-      
-        <!-- Top catégories (cours) -->
-        <div class="col-lg-4">
-          <div class="card">
-            <div class="card-header">
-              <div>
-                <div class="card-title">Top catégories</div>
-                <div class="card-subtitle">Par nombre de cours</div>
-              </div>
-            </div>
-      
-            <div class="table-responsive">
-              <table class="table table-vcenter card-table table-clean table-compact">
-                <thead>
-                  <tr>
-                    <th style="width: 60px;">#</th>
-                    <th class="text-center">Catégorie</th>
-                    <th class="text-end" style="width: 89px;">Cours</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr *ngIf="!dashboard.topCategoriesByCourses?.length">
-                    <td colspan="3" class="text-secondary px-4 py-4">Aucun résultat.</td>
-                  </tr>
-      
-                  <tr *ngFor="let item of dashboard.topCategoriesByCourses; let i = index" class="row-hover">
-                    <td class="text-secondary fw-bold">{{ i + 1 }}</td>
-                    <td class="fw-semibold text-center"><span class="name-cell">{{ item.label }}</span></td>
-                    <td class="text-center fw-bold" >{{ item.count }}</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      
-        <!-- Top catégories (inscriptions) -->
-        <div class="col-lg-4">
-          <div class="card">
-            <div class="card-header">
-              <div>
-                <div class="card-title">Top catégories</div>
-                <div class="card-subtitle">Par inscriptions</div>
-              </div>
-            </div>
-      
-            <div class="table-responsive">
-              <table class="table table-vcenter card-table table-clean table-compact">
-                <thead>
-                  <tr>
-                    <th style="width: 60px;">#</th>
-                    <th class="text-center">Catégorie</th>
-                    <th class="text-end" style="width: 148px;">Inscriptions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr *ngIf="!dashboard.topCategoriesByEnrollments?.length">
-                    <td colspan="3" class="text-secondary px-4 py-4">Aucun résultat.</td>
-                  </tr>
-      
-                  <tr *ngFor="let item of dashboard.topCategoriesByEnrollments; let i = index" class="row-hover">
-                    <td class="text-secondary fw-bold">{{ i + 1 }}</td>
-                    <td class="fw-semibold text-center"><span class="name-cell">{{ item.label }}</span></td>
-                    <td class="text-center fw-bold" style="width: 148px;">{{ item.count }}</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
+    
+          <div class="table-responsive">
+            <table class="table table-vcenter card-table table-clean table-compact">
+              <thead>
+                <tr>
+                  <th style="width: 60px;">#</th>
+                  <th class="text-center">Cours</th>
+                  <th class="text-end" style="width: 148px;">Inscriptions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngIf="!dashboard.topCoursesByEnrollments?.length">
+                  <td colspan="3" class="text-secondary px-4 py-4">Aucun résultat.</td>
+                </tr>
+    
+                <tr *ngFor="let item of dashboard.topCoursesByEnrollments; let i = index" class="row-hover">
+                  <td class="text-secondary fw-bold">{{ i + 1 }}</td>
+                  <td class="fw-semibold text-center"><span class="name-cell">{{ item.label }}</span></td>
+                  <td class="text-center fw-bold" style="width: 148px;">{{ item.count }}</td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </div>
       </div>
-      
+    
+      <div class="col-lg-4">
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <div class="card-title">Top catégories</div>
+              <div class="card-subtitle">Par nombre de cours</div>
+            </div>
+          </div>
+    
+          <div class="table-responsive">
+            <table class="table table-vcenter card-table table-clean table-compact">
+              <thead>
+                <tr>
+                  <th style="width: 60px;">#</th>
+                  <th class="text-center">Catégorie</th>
+                  <th class="text-end" style="width: 89px;">Cours</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngIf="!dashboard.topCategoriesByCourses?.length">
+                  <td colspan="3" class="text-secondary px-4 py-4">Aucun résultat.</td>
+                </tr>
+    
+                <tr *ngFor="let item of dashboard.topCategoriesByCourses; let i = index" class="row-hover">
+                  <td class="text-secondary fw-bold">{{ i + 1 }}</td>
+                  <td class="fw-semibold text-center"><span class="name-cell">{{ item.label }}</span></td>
+                  <td class="text-center fw-bold">{{ item.count }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    
+      <div class="col-lg-4">
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <div class="card-title">Top catégories</div>
+              <div class="card-subtitle">Par inscriptions</div>
+            </div>
+          </div>
+    
+          <div class="table-responsive">
+            <table class="table table-vcenter card-table table-clean table-compact">
+              <thead>
+                <tr>
+                  <th style="width: 60px;">#</th>
+                  <th class="text-center">Catégorie</th>
+                  <th class="text-end" style="width: 148px;">Inscriptions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngIf="!dashboard.topCategoriesByEnrollments?.length">
+                  <td colspan="3" class="text-secondary px-4 py-4">Aucun résultat.</td>
+                </tr>
+    
+                <tr *ngFor="let item of dashboard.topCategoriesByEnrollments; let i = index" class="row-hover">
+                  <td class="text-secondary fw-bold">{{ i + 1 }}</td>
+                  <td class="fw-semibold text-center"><span class="name-cell">{{ item.label }}</span></td>
+                  <td class="text-center fw-bold" style="width: 148px;">{{ item.count }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="row row-cards mt-3">
+      <div class="col-lg-6">
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <div class="card-title">Top services</div>
+              <div class="card-subtitle">Par inscriptions (acceptées)</div>
+            </div>
+          </div>
+    
+          <div class="table-responsive">
+            <table class="table table-vcenter card-table table-clean table-compact">
+              <thead>
+                <tr>
+                  <th style="width: 60px;">#</th>
+                  <th class="text-center">Service</th>
+                  <th class="text-end" style="width: 148px;">Inscriptions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngIf="!dashboard.topServicesByEnrollments?.length">
+                  <td colspan="3" class="text-secondary px-4 py-4">Aucun résultat.</td>
+                </tr>
+    
+                <tr *ngFor="let item of dashboard.topServicesByEnrollments; let i = index" class="row-hover">
+                  <td class="text-secondary fw-bold">{{ i + 1 }}</td>
+                  <td class="fw-semibold text-center"><span class="name-cell">{{ item.label }}</span></td>
+                  <td class="text-center fw-bold" style="width: 148px;">{{ item.count }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    
+      <div class="col-lg-6">
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <div class="card-title">Top statuts</div>
+              <div class="card-subtitle">Par inscriptions (acceptées)</div>
+            </div>
+          </div>
+    
+          <div class="table-responsive">
+            <table class="table table-vcenter card-table table-clean table-compact">
+              <thead>
+                <tr>
+                  <th style="width: 60px;">#</th>
+                  <th class="text-center">Statut</th>
+                  <th class="text-end" style="width: 148px;">Inscriptions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngIf="!dashboard.topStatutsByEnrollments?.length">
+                  <td colspan="3" class="text-secondary px-4 py-4">Aucun résultat.</td>
+                </tr>
+    
+                <tr *ngFor="let item of dashboard.topStatutsByEnrollments; let i = index" class="row-hover">
+                  <td class="text-secondary fw-bold">{{ i + 1 }}</td>
+                  <td class="fw-semibold text-center"><span class="name-cell">{{ item.label }}</span></td>
+                  <td class="text-center fw-bold" style="width: 148px;">{{ item.count }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+    
   </div>
   

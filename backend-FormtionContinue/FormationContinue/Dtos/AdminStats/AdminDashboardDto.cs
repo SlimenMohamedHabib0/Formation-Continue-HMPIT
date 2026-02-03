@@ -25,6 +25,8 @@
         public List<CountItemDto> TopCoursesByEnrollments { get; set; } = new();
         public List<CountItemDto> TopCategoriesByCourses { get; set; } = new();
         public List<CountItemDto> TopCategoriesByEnrollments { get; set; } = new();
+        public List<CountItemDto> TopServicesByEnrollments { get; set; } = new();
+        public List<CountItemDto> TopStatutsByEnrollments { get; set; } = new();
     }
 
     public class CountItemDto

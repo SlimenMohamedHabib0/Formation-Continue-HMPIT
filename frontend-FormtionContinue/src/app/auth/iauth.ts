@@ -9,6 +9,8 @@ export interface RegisterDto {
   fullName: string;
   email: string;
   password: string;
+  serviceId: number;
+  statutId: number;
 }
 
 export interface AuthResponseDto {
@@ -16,6 +18,10 @@ export interface AuthResponseDto {
   fullName: string;
   email: string;
   role: Role;
+  serviceId: number;
+  serviceLibelle: string;
+  statutId: number;
+  statutLibelle: string;
   token: string;
 }
 
@@ -24,4 +30,8 @@ export interface MeResponse {
   fullName: string;
   email: string;
   role: Role;
+  serviceId: number;
+  serviceLibelle: string;
+  statutId: number;
+  statutLibelle: string;
 }

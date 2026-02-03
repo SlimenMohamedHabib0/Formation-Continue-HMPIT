@@ -47,7 +47,11 @@ namespace FormationContinue.Controllers
                     FullName = u.FullName,
                     Email = u.Email,
                     Role = u.Role,
-                    CreatedAt = u.CreatedAt
+                    CreatedAt = u.CreatedAt,
+                    ServiceId = u.ServiceId,
+                    ServiceLibelle = u.Service.Libelle,
+                    StatutId = u.StatutId,
+                    StatutLibelle = u.Statut.Libelle
                 })
                 .ToListAsync();
 
@@ -66,7 +70,11 @@ namespace FormationContinue.Controllers
                     FullName = u.FullName,
                     Email = u.Email,
                     Role = u.Role,
-                    CreatedAt = u.CreatedAt
+                    CreatedAt = u.CreatedAt,
+                    ServiceId = u.ServiceId,
+                    ServiceLibelle = u.Service.Libelle,
+                    StatutId = u.StatutId,
+                    StatutLibelle = u.Statut.Libelle
                 })
                 .FirstOrDefaultAsync();
 
@@ -77,22 +85,22 @@ namespace FormationContinue.Controllers
         }
 
         [HttpPut("users/{id}")]
-        public async Task<ActionResult<AdminUserResponseDto>> Update(int id, [FromBody] AdminUserUpdateRequestDto dto)
+        public async Task<ActionResult<AdminUserResponseDto>> Update(int id, AdminUserUpdateRequestDto dto)
         {
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == id);
             if (user == null)
                 return NotFound();
 
-            var newRole = (dto.Role ?? "").Trim().ToUpper();
+            var newRole = dto.Role.Trim().ToUpper();
             if (newRole != "ADMIN" && newRole != "PROFESSOR" && newRole != "USER")
                 return BadRequest("Role invalide.");
 
             var email = dto.Email.Trim().ToLower();
-            var emailExists = await _context.Users.CountAsync(u => u.Id != id && u.Email.ToLower() == email)>0;
+            var emailExists = await _context.Users.CountAsync(u => u.Id != id && u.Email.ToLower() == email) > 0;
             if (emailExists)
                 return BadRequest("Email déjà utilisé.");
 
-            var isAdminNow = (user.Role ?? "").Trim().ToUpper() == "ADMIN";
+            var isAdminNow = user.Role.ToUpper() == "ADMIN";
             if (isAdminNow && newRole != "ADMIN")
             {
                 var adminsCount = await _context.Users.CountAsync(u => u.Role.ToUpper() == "ADMIN");
@@ -100,28 +108,40 @@ namespace FormationContinue.Controllers
                     return BadRequest("Impossible de retirer le dernier admin.");
             }
 
+            var serviceExists = await _context.Services.CountAsync(s => s.Id == dto.ServiceId) > 0;
+            if (!serviceExists)
+                return BadRequest("Service introuvable.");
+
+            var statutExists = await _context.Statuts.CountAsync(s => s.Id == dto.StatutId) > 0;
+            if (!statutExists)
+                return BadRequest("Statut introuvable.");
+
             user.FullName = dto.FullName.Trim();
             user.Email = dto.Email.Trim();
             user.Role = newRole;
+            user.ServiceId = dto.ServiceId;
+            user.StatutId = dto.StatutId;
 
             if (!string.IsNullOrWhiteSpace(dto.Password))
             {
                 user.PasswordHash = new PasswordHasher<User>()
-                .HashPassword(user, dto.Password);
+                    .HashPassword(user, dto.Password);
             }
 
             await _context.SaveChangesAsync();
 
-            var res = new AdminUserResponseDto
+            return Ok(new AdminUserResponseDto
             {
                 Id = user.Id,
                 FullName = user.FullName,
                 Email = user.Email,
                 Role = user.Role,
-                CreatedAt = user.CreatedAt
-            };
-
-            return Ok(res);
+                CreatedAt = user.CreatedAt,
+                ServiceId = user.ServiceId,
+                ServiceLibelle = user.Service.Libelle,
+                StatutId = user.StatutId,
+                StatutLibelle = user.Statut.Libelle
+            });
         }
     }
 }

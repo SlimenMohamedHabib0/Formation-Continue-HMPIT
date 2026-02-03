@@ -11,6 +11,10 @@
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
     margin-bottom: 28px;
   }
+  .scroll-select {
+    max-height: 170px;
+    overflow-y: auto;
+  }
   
   .auth-logo {
     width: 110px;

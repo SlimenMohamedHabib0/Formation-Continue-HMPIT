@@ -25,8 +25,8 @@ namespace FormationContinue.Controllers
         public async Task<ActionResult<List<ProfessorResponseDto>>> GetAll([FromQuery] string? search)
         {
             var q = _context.Users
-    .AsNoTracking()
-    .Where(u => u.Role == "PROFESSOR");
+                .AsNoTracking()
+                .Where(u => u.Role == "PROFESSOR");
 
             if (!string.IsNullOrWhiteSpace(search))
             {
@@ -37,17 +37,21 @@ namespace FormationContinue.Controllers
             }
 
             var profs = await q
+                .OrderByDescending(u => u.Id)
                 .Select(u => new ProfessorResponseDto
                 {
                     Id = u.Id,
                     FullName = u.FullName,
                     Email = u.Email,
-                    Role = u.Role
+                    Role = u.Role,
+                    ServiceId = u.ServiceId,
+                    ServiceLibelle = u.Service.Libelle,
+                    StatutId = u.StatutId,
+                    StatutLibelle = u.Statut.Libelle
                 })
                 .ToListAsync();
 
             return Ok(profs);
-
         }
 
         [HttpPost("professors")]
@@ -56,8 +60,15 @@ namespace FormationContinue.Controllers
             var email = dto.Email.Trim();
             var fullName = dto.FullName.Trim();
 
-            var user = await _context.Users
-                .FirstOrDefaultAsync(u => u.Email.ToLower() == email.ToLower());
+            var serviceExists = await _context.Services.CountAsync(s => s.Id == dto.ServiceId) > 0;
+            if (!serviceExists)
+                return BadRequest("Service introuvable.");
+
+            var statutExists = await _context.Statuts.CountAsync(s => s.Id == dto.StatutId) > 0;
+            if (!statutExists)
+                return BadRequest("Statut introuvable.");
+
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email.ToLower() == email.ToLower());
 
             if (user != null)
             {
@@ -73,31 +84,43 @@ namespace FormationContinue.Controllers
                 user.FullName = fullName;
                 user.Email = email;
                 user.Role = "PROFESSOR";
+                user.ServiceId = dto.ServiceId;
+                user.StatutId = dto.StatutId;
 
-                if (!string.IsNullOrWhiteSpace(dto.Password))
-                {
-                    user.PasswordHash = new PasswordHasher<User>().HashPassword(user, dto.Password);
-                }
+                user.PasswordHash = new PasswordHasher<User>().HashPassword(user, dto.Password);
 
                 await _context.SaveChangesAsync();
 
-                return Ok(new ProfessorResponseDto
-                {
-                    Id = user.Id,
-                    FullName = user.FullName,
-                    Email = user.Email,
-                    Role = user.Role
-                });
+                var res = await _context.Users
+                    .AsNoTracking()
+                    .Where(u => u.Id == user.Id)
+                    .Select(u => new ProfessorResponseDto
+                    {
+                        Id = u.Id,
+                        FullName = u.FullName,
+                        Email = u.Email,
+                        Role = u.Role,
+                        ServiceId = u.ServiceId,
+                        ServiceLibelle = u.Service.Libelle,
+                        StatutId = u.StatutId,
+                        StatutLibelle = u.Statut.Libelle
+                    })
+                    .FirstAsync();
+
+                return Ok(res);
             }
 
-            if (string.IsNullOrWhiteSpace(dto.Password))
-                return BadRequest("Password is required.");
+            var emailExists = await _context.Users.CountAsync(u => u.Email.ToLower() == email.ToLower()) > 0;
+            if (emailExists)
+                return BadRequest("Email Already Used");
 
             var newUser = new User
             {
                 FullName = fullName,
                 Email = email,
-                Role = "PROFESSOR"
+                Role = "PROFESSOR",
+                ServiceId = dto.ServiceId,
+                StatutId = dto.StatutId
             };
 
             newUser.PasswordHash = new PasswordHasher<User>().HashPassword(newUser, dto.Password);
@@ -105,15 +128,24 @@ namespace FormationContinue.Controllers
             _context.Users.Add(newUser);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction(nameof(GetAll), new { }, new ProfessorResponseDto
-            {
-                Id = newUser.Id,
-                FullName = newUser.FullName,
-                Email = newUser.Email,
-                Role = newUser.Role
-            });
-        }
+            var created = await _context.Users
+                .AsNoTracking()
+                .Where(u => u.Id == newUser.Id)
+                .Select(u => new ProfessorResponseDto
+                {
+                    Id = u.Id,
+                    FullName = u.FullName,
+                    Email = u.Email,
+                    Role = u.Role,
+                    ServiceId = u.ServiceId,
+                    ServiceLibelle = u.Service.Libelle,
+                    StatutId = u.StatutId,
+                    StatutLibelle = u.Statut.Libelle
+                })
+                .FirstAsync();
 
+            return CreatedAtAction(nameof(GetAll), new { }, created);
+        }
 
         [HttpPut("professors/{id}")]
         public async Task<IActionResult> Update(int id, ProfessorUpdateDto dto)
@@ -133,8 +165,18 @@ namespace FormationContinue.Controllers
             if (emailUsedByOther)
                 return BadRequest("Email Already Used");
 
+            var serviceExists = await _context.Services.CountAsync(s => s.Id == dto.ServiceId) > 0;
+            if (!serviceExists)
+                return BadRequest("Service introuvable.");
+
+            var statutExists = await _context.Statuts.CountAsync(s => s.Id == dto.StatutId) > 0;
+            if (!statutExists)
+                return BadRequest("Statut introuvable.");
+
             user.FullName = dto.FullName.Trim();
             user.Email = newEmail;
+            user.ServiceId = dto.ServiceId;
+            user.StatutId = dto.StatutId;
 
             if (!string.IsNullOrWhiteSpace(dto.Password))
             {
@@ -144,7 +186,6 @@ namespace FormationContinue.Controllers
             await _context.SaveChangesAsync();
             return NoContent();
         }
-
 
         [HttpDelete("professors/{id}")]
         public async Task<IActionResult> Delete(int id)
@@ -194,18 +235,17 @@ namespace FormationContinue.Controllers
 
             return NoContent();
         }
+
         [HttpGet("professors/{id:int}/dashboard")]
         public async Task<ActionResult<ProfessorDashboardDto>> GetProfessorDashboard(int id)
         {
             var profCount = await _context.Users
-    .AsNoTracking()
-    .CountAsync(u => u.Id == id && u.Role == "PROFESSOR");
+                .AsNoTracking()
+                .CountAsync(u => u.Id == id && u.Role == "PROFESSOR");
 
             if (profCount == 0)
                 return NotFound("Professeur introuvable.");
 
-
-           
             var myCourseIds = await _context.CourseProfessors
                 .AsNoTracking()
                 .Where(cp => cp.ProfessorId == id)
@@ -220,18 +260,15 @@ namespace FormationContinue.Controllers
                     NbMyCoursesTotal = 0,
                     NbMyCoursesDraft = 0,
                     NbMyCoursesPublished = 0,
-
                     NbEnrollmentsTotal = 0,
                     NbEnrollmentsPending = 0,
                     NbEnrollmentsAccepted = 0,
                     NbEnrollmentsRefused = 0,
-
                     NbAttemptsTotal = 0,
                     NbAttemptsPassed = 0,
                     NbAttemptsFailed = 0,
                     AverageNote = null,
                     SuccessRatePercent = 0,
-
                     TopCoursesByEnrollments = new List<CourseCountItemDto>(),
                     SuccessRateByCourse = new List<CourseSuccessItemDto>()
                 });
@@ -255,23 +292,20 @@ namespace FormationContinue.Controllers
                 .AverageAsync();
 
             var successRate = nbAttempts == 0 ? 0 : (double)nbPassed * 100.0 / nbAttempts;
-            var professorName = await _context.Users
-    .Where(u => u.Id == id)
-    .Select(u => u.FullName)
-    .FirstAsync();
+
             var topCoursesByEnrollments = await _context.Enrollments
-    .AsNoTracking()
-    .Where(e => myCourseIds.Contains(e.CourseId))
-    .GroupBy(e => new { e.CourseId, e.Course.Titre })
-    .Select(g => new CourseCountItemDto
-    {
-        CourseId = g.Key.CourseId,
-        CourseTitre = g.Key.Titre,
-        Count = g.Count()
-    })
-    .OrderByDescending(x => x.Count)
-    .Take(10)
-    .ToListAsync();
+                .AsNoTracking()
+                .Where(e => myCourseIds.Contains(e.CourseId))
+                .GroupBy(e => new { e.CourseId, e.Course.Titre })
+                .Select(g => new CourseCountItemDto
+                {
+                    CourseId = g.Key.CourseId,
+                    CourseTitre = g.Key.Titre,
+                    Count = g.Count()
+                })
+                .OrderByDescending(x => x.Count)
+                .Take(10)
+                .ToListAsync();
 
             var successByCourseRaw = await _context.TentativesQcm
                 .AsNoTracking()
@@ -301,29 +335,23 @@ namespace FormationContinue.Controllers
                 .Take(10)
                 .ToList();
 
-
             return Ok(new ProfessorDashboardDto
             {
                 NbMyCoursesTotal = myCourseIds.Count,
                 NbMyCoursesDraft = nbDraft,
                 NbMyCoursesPublished = nbPublished,
-
                 NbEnrollmentsTotal = nbEnrollTotal,
                 NbEnrollmentsPending = nbEnrollPending,
                 NbEnrollmentsAccepted = nbEnrollAccepted,
                 NbEnrollmentsRefused = nbEnrollRefused,
-
                 NbAttemptsTotal = nbAttempts,
                 NbAttemptsPassed = nbPassed,
                 NbAttemptsFailed = nbFailed,
                 AverageNote = avgNote,
                 SuccessRatePercent = successRate,
-
                 TopCoursesByEnrollments = topCoursesByEnrollments,
                 SuccessRateByCourse = successRateByCourse
             });
-
         }
-
     }
 }

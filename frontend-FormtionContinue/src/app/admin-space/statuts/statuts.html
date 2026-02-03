@@ -1,0 +1,107 @@
+<div class="page-body admin-statuts">
+    <div class="page-header mb-4">
+      <div>
+        <h2 class="page-title">Gestion des statuts</h2>
+        <div class="text-secondary">Recherche, création, modification et suppression des statuts.</div>
+      </div>
+  
+      <div class="ms-auto" *ngIf="mode === 'list'">
+        <button class="btn btn-primary" type="button" (click)="openCreate()">
+          Nouveau statuts
+        </button>
+      </div>
+    </div>
+  
+    <div *ngIf="error" class="alert alert-danger mb-3">{{ error }}</div>
+    <div *ngIf="success" class="alert alert-success mb-3">{{ success }}</div>
+  
+    <div *ngIf="mode === 'list'" class="card">
+      <div class="card-body">
+        <div class="d-flex gap-2 flex-wrap align-items-center">
+          <div class="search-box">
+            <input
+              class="form-control"
+              type="text"
+              [(ngModel)]="search"
+              placeholder="Rechercher un statuts…"
+              (input)="onSearchChange()"
+            />
+          </div>
+  
+          <button class="btn btn-outline-secondary" type="button" (click)="search=''; onSearchChange()">
+            Réinitialiser
+          </button>
+        </div>
+      </div>
+  
+      <div class="table-responsive">
+        <table class="table table-vcenter card-table table-clean">
+          <thead>
+            <tr>
+              <th>Libellé</th>
+              <th class="text-end" style="width: 220px">Actions</th>
+            </tr>
+          </thead>
+  
+          <tbody>
+            <tr *ngIf="loading">
+              <td colspan="2" class="text-center py-5">
+                <div class="spinner-border text-primary"></div>
+              </td>
+            </tr>
+  
+            <tr *ngIf="!loading && !items.length">
+              <td colspan="2" class="text-center text-secondary py-4">Aucun statuts trouvé.</td>
+            </tr>
+  
+            <tr *ngFor="let s of items" class="row-hover">
+              <td class="fw-semibold">
+                <span class="name-cell">{{ s.libelle }}</span>
+              </td>
+  
+              <td class="text-end">
+                <button class="btn btn-sm btn-outline-primary me-2" type="button" (click)="openEdit(s)">
+                  Modifier
+                </button>
+                <button class="btn btn-sm btn-outline-danger" type="button" (click)="delete(s)">
+                  Supprimer
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  
+    <div *ngIf="mode === 'edit'" class="card">
+      <div class="card-header">
+        <div class="card-title">
+          {{ modalMode === 'create' ? 'Créer un statuts' : 'Modifier le statuts' }}
+        </div>
+        <div class="ms-auto">
+          <button class="btn btn-outline-secondary" type="button" (click)="closeModal()">Fermer</button>
+        </div>
+      </div>
+  
+      <div class="card-body">
+        <div class="row g-3">
+          <div class="col-md-8">
+            <label class="form-label">Libellé</label>
+            <input class="form-control" type="text" [(ngModel)]="form.libelle" />
+          </div>
+        </div>
+  
+        <div class="mt-4 d-flex gap-2">
+          <button class="btn btn-primary" type="button" [disabled]="saving" (click)="save()">
+            <span *ngIf="!saving">{{ modalMode === 'create' ? 'Créer' : 'Enregistrer' }}</span>
+            <span *ngIf="saving">Enregistrement...</span>
+          </button>
+  
+          <button class="btn btn-outline-secondary" type="button" [disabled]="saving" (click)="closeModal()">
+            Annuler
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  

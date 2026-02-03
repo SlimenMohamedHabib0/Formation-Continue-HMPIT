@@ -7,6 +7,8 @@ import { Utilisateurs } from './utilisateurs/utilisateurs';
 import { Supervision } from './supervision/supervision';
 import { Categories } from './categories/categories';
 import { Dashboard as ProfDashboardAdmin } from './professeurs/dashboard/dashboard';
+import { Services } from './services/services';
+import { Statuts } from './statuts/statuts';
 
 
 const routes: Routes = [
@@ -20,6 +22,9 @@ const routes: Routes = [
       { path: 'utilisateurs', component: Utilisateurs },
       { path: 'supervision', component: Supervision },
       { path: 'categories', component: Categories },
+      { path: 'services', component: Services },
+      { path: 'statuts', component: Statuts },
+
     ],
   },
 ];

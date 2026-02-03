@@ -34,7 +34,7 @@ export class AuthSrvc {
     localStorage.setItem(this.TOKEN_KEY, token);
   }
 
-  private setMe(me: MeResponse | null): void { //check me exists if yes save it and update the subject else set subject to null and remove from localstorage
+  private setMe(me: MeResponse | null): void {
     this.meSubject.next(me);
     if (me) localStorage.setItem(this.ME_KEY, JSON.stringify(me));
     else localStorage.removeItem(this.ME_KEY);
@@ -54,27 +54,35 @@ export class AuthSrvc {
   }
 
   login(dto: LoginDto): Observable<AuthResponseDto> {
-    return this.http.post<AuthResponseDto>(`${this.baseUrl}/login`, dto).pipe(
-      tap((res) => {
-        this.setToken(res.token);
-        this.setMe({
-          id: res.userId,
-          fullName: res.fullName,
-          email: res.email,
-          role: res.role,
-        });
-      })
-    );
+    return this.http
+      .post<AuthResponseDto>(`${this.baseUrl}/login`, dto)
+      .pipe(
+        tap((res) => {
+          this.setToken(res.token);
+          this.setMe({
+            id: res.userId,
+            fullName: res.fullName,
+            email: res.email,
+            role: res.role,
+            serviceId: res.serviceId,
+            serviceLibelle: res.serviceLibelle,
+            statutId: res.statutId,
+            statutLibelle: res.statutLibelle,
+          });
+        })
+      );
   }
 
   register(dto: RegisterDto): Observable<string> {
-    return this.http.post(`${this.baseUrl}/register`, dto, { responseType: 'text' });
+    return this.http.post(`${this.baseUrl}/register`, dto, {
+      responseType: 'text',
+    });
   }
 
   fetchMe(): Observable<MeResponse> {
-    return this.http.get<MeResponse>(`${this.baseUrl}/me`).pipe(
-      tap((me) => this.setMe(me))
-    );
+    return this.http
+      .get<MeResponse>(`${this.baseUrl}/me`)
+      .pipe(tap((me) => this.setMe(me)));
   }
 
   logout(): void {

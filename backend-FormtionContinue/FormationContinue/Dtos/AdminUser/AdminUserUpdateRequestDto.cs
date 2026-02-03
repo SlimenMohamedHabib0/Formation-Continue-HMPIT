@@ -4,16 +4,20 @@ namespace FormationContinue.Dtos.AdminUser
 {
     public class AdminUserUpdateRequestDto
     {
-        [Required]
-        [MinLength(3)]
+        [Required, MinLength(3)]
         public string FullName { get; set; } = string.Empty;
 
-        [Required]
-        [EmailAddress]
+        [Required, EmailAddress]
         public string Email { get; set; } = string.Empty;
 
         [Required]
         public string Role { get; set; } = string.Empty;
+
+        [Required]
+        public int ServiceId { get; set; }
+
+        [Required]
+        public int StatutId { get; set; }
 
         public string? Password { get; set; }
     }

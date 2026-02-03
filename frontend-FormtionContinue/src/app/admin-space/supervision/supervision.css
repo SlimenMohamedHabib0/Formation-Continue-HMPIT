@@ -26,7 +26,10 @@
   .cat-box {
     min-width: 260px;
   }
-  
+  .select-scroll {
+    max-height: 190px;
+    overflow-y: auto;
+  }
   .status-box {
     min-width: 220px;
   }

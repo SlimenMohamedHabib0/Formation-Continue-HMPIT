@@ -20,9 +20,15 @@ export class Login {
 
   error: string | null = null;
   loading = false;
+  showPassword = false;
+
+  
+  
 
   constructor(private auth: AuthSrvc, private router: Router) {}
-
+  togglePassword(): void {
+    this.showPassword = !this.showPassword;
+  }
   submit(): void {
     this.error = null;
     this.loading = true;

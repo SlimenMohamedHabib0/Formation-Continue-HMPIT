@@ -2,7 +2,7 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Subject, Subscription, debounceTime, distinctUntilChanged } from 'rxjs';
-import { AdminSrvc } from '../admin-srvc';
+import { AdminSrvc, IService, IStatut } from '../admin-srvc';
 import { Iuser } from '../interfaces/iuser';
 
 type Mode = 'list' | 'edit';
@@ -16,6 +16,9 @@ type Mode = 'list' | 'edit';
 })
 export class Utilisateurs implements OnInit, OnDestroy {
   users: Iuser[] = [];
+  services: IService[] = [];
+  statuts: IStatut[] = [];
+
   loading = true;
   mode: Mode = 'list';
 
@@ -28,6 +31,8 @@ export class Utilisateurs implements OnInit, OnDestroy {
     email: '',
     role: 'USER' as 'ADMIN' | 'PROFESSOR' | 'USER',
     password: '',
+    serviceId: null as number | null,
+    statutId: null as number | null,
   };
 
   showPassword = false;
@@ -42,6 +47,7 @@ export class Utilisateurs implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.load();
+    this.loadRefs();
 
     this.sub.add(
       this.filter$
@@ -52,6 +58,18 @@ export class Utilisateurs implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.sub.unsubscribe();
+  }
+
+  loadRefs(): void {
+    this.adminSrvc.getServices().subscribe({
+      next: (res) => (this.services = res),
+      error: () => {},
+    });
+
+    this.adminSrvc.getStatuts().subscribe({
+      next: (res) => (this.statuts = res),
+      error: () => {},
+    });
   }
 
   load(): void {
@@ -94,6 +112,8 @@ export class Utilisateurs implements OnInit, OnDestroy {
       email: u.email,
       role: u.role,
       password: '',
+      serviceId: u.serviceId ?? null,
+      statutId: u.statutId ?? null,
     };
   }
 
@@ -107,6 +127,8 @@ export class Utilisateurs implements OnInit, OnDestroy {
       email: '',
       role: 'USER',
       password: '',
+      serviceId: null,
+      statutId: null,
     };
   }
 
@@ -117,6 +139,8 @@ export class Utilisateurs implements OnInit, OnDestroy {
       fullName: this.form.fullName.trim(),
       email: this.form.email.trim(),
       role: this.form.role,
+      serviceId: this.form.serviceId,
+      statutId: this.form.statutId,
     };
 
     const pwd = this.form.password.trim();
@@ -128,13 +152,7 @@ export class Utilisateurs implements OnInit, OnDestroy {
         this.loading = false;
         this.success = 'Utilisateur modifié avec succès.';
         this.mode = 'list';
-        this.form = {
-          id: 0,
-          fullName: '',
-          email: '',
-          role: 'USER',
-          password: '',
-        };
+        this.cancel();
         this.load();
       },
       error: () => {

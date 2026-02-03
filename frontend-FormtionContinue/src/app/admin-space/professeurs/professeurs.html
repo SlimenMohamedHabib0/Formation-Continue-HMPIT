@@ -46,6 +46,8 @@
           <tr>
             <th>Nom</th>
             <th>Email</th>
+            <th>Service</th>
+            <th>Statut</th>
             <th class="text-end">Actions</th>
           </tr>
         </thead>
@@ -64,36 +66,17 @@
           </tr>
 
           <tr *ngFor="let p of professeurs">
-            <td class="fw-semibold">{{ p.fullName }}</td>
+            <td>{{ p.fullName }}</td>
             <td>{{ p.email }}</td>
+            <td>{{ p.serviceLibelle }}</td>
+            <td>{{ p.statutLibelle }}</td>
             <td class="text-end">
-              <!-- ✅ NEW BUTTON -->
-              <button
-                class="btn btn-sm btn-outline-success me-2"
-                type="button"
-                (click)="goToDashboard(p)"
-                title="Voir les statistiques"
-              >
-                Voir stats
-              </button>
-
-              <button
-                class="btn btn-sm btn-outline-primary me-2"
-                type="button"
-                (click)="openEdit(p)"
-              >
-                Modifier
-              </button>
-
-              <button
-                class="btn btn-sm btn-outline-danger"
-                type="button"
-                (click)="delete(p.id)"
-              >
-                Supprimer
-              </button>
+              <button class="btn btn-sm btn-outline-success me-2" (click)="goToDashboard(p)">Voir Stats</button>
+              <button class="btn btn-sm btn-outline-primary me-2" (click)="openEdit(p)">Modifier</button>
+              <button class="btn btn-sm btn-outline-danger" (click)="delete(p.id)">Supprimer</button>
             </td>
           </tr>
+          
         </tbody>
       </table>
     </div>
@@ -179,7 +162,32 @@
           <label class="form-label">Email</label>
           <input class="form-control" type="email" [(ngModel)]="form.email" />
         </div>
-
+        <div class="col-md-6">
+          <label class="form-label">Service</label>
+          <select
+            class="form-select select-scroll"
+            [(ngModel)]="form.serviceId"
+          >
+            <option [ngValue]="null">—</option>
+            <option *ngFor="let s of services" [ngValue]="s.id">
+              {{ s.libelle }}
+            </option>
+          </select>
+        </div>
+        
+        <div class="col-md-6">
+          <label class="form-label">Statut</label>
+          <select
+            class="form-select select-scroll"
+            [(ngModel)]="form.statutId"
+          >
+            <option [ngValue]="null">—</option>
+            <option *ngFor="let s of statuts" [ngValue]="s.id">
+              {{ s.libelle }}
+            </option>
+          </select>
+        </div>
+        
         <div class="col-md-6">
           <label class="form-label">Nouveau mot de passe (optionnel)</label>
           <div class="input-group">

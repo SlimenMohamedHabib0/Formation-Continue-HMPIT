@@ -21,10 +21,24 @@ namespace FormationContinue.Data
         public DbSet<QuestionCourse> CourseQuestions { get; set; } = null!;
         public DbSet<Enrollment> Enrollments { get; set; } = null!;
         public DbSet<CourseProgress> Progress { get; set; } = null!;
+        public DbSet<Service> Services { get; set; } = null!;
+        public DbSet<Statut> Statuts { get; set; } = null!;
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+
+            modelBuilder.Entity<Service>(entity =>
+            {
+                entity.HasIndex(s => s.Libelle).IsUnique();
+                entity.Property(s => s.Libelle).HasMaxLength(80).IsRequired();
+            });
+
+            modelBuilder.Entity<Statut>(entity =>
+            {
+                entity.HasIndex(s => s.Libelle).IsUnique();
+                entity.Property(s => s.Libelle).HasMaxLength(80).IsRequired();
+            });
 
             modelBuilder.Entity<User>(entity =>
             {
@@ -33,13 +47,24 @@ namespace FormationContinue.Data
                 entity.Property(u => u.Email).HasMaxLength(120).IsRequired();
                 entity.Property(u => u.Role).HasMaxLength(20).IsRequired();
                 entity.Property(u => u.PasswordHash).HasMaxLength(400).IsRequired();
+
+                entity.HasOne(u => u.Service)
+                    .WithMany()
+                    .HasForeignKey(u => u.ServiceId)
+                    .OnDelete(DeleteBehavior.NoAction);
+
+                entity.HasOne(u => u.Statut)
+                    .WithMany()
+                    .HasForeignKey(u => u.StatutId)
+                    .OnDelete(DeleteBehavior.NoAction);
             });
+
             modelBuilder.Entity<Category>(entity =>
             {
                 entity.HasIndex(u => u.Libelle).IsUnique();
                 entity.Property(u => u.Libelle).HasMaxLength(100).IsRequired();
-
             });
+
             modelBuilder.Entity<Course>(entity =>
             {
                 entity.Property(c => c.Titre).HasMaxLength(200).IsRequired();
@@ -50,7 +75,6 @@ namespace FormationContinue.Data
                 entity.Property(c => c.VideoFileName).HasMaxLength(255);
                 entity.Property(c => c.VideoPath).HasMaxLength(600);
                 entity.Property(c => c.VideoMimeType).HasMaxLength(100);
-
 
                 entity.Property(c => c.ContenuPdf).HasColumnType("BLOB");
 
@@ -74,6 +98,7 @@ namespace FormationContinue.Data
                     .HasForeignKey(cp => cp.ProfessorId)
                     .OnDelete(DeleteBehavior.NoAction);
             });
+
             modelBuilder.Entity<Question>(entity =>
             {
                 entity.Property(q => q.Enonce).HasMaxLength(2000).IsRequired();
@@ -87,12 +112,10 @@ namespace FormationContinue.Data
                       .IsRequired()
                       .HasConversion<int>();
 
-
                 entity.HasOne(c => c.Question)
                     .WithMany(q => q.Choix)
                     .HasForeignKey(c => c.QuestionId)
                     .OnDelete(DeleteBehavior.NoAction);
-
             });
 
             modelBuilder.Entity<TentativeQcm>(entity =>
@@ -126,14 +149,12 @@ namespace FormationContinue.Data
                     .OnDelete(DeleteBehavior.NoAction);
             });
 
-
             modelBuilder.Entity<ResultatQuestion>(entity =>
             {
                 entity.Property(r => r.PointsObtenus).IsRequired();
                 entity.Property(r => r.EstCorrect)
                       .IsRequired()
                       .HasConversion<int>();
-
 
                 entity.HasIndex(r => new { r.TentativeQcmId, r.QuestionId }).IsUnique();
 
@@ -146,7 +167,6 @@ namespace FormationContinue.Data
                     .WithMany(q => q.ResultatQuestions)
                     .HasForeignKey(r => r.QuestionId)
                     .OnDelete(DeleteBehavior.NoAction);
-
             });
 
             modelBuilder.Entity<QuestionCourse>(entity =>
@@ -163,10 +183,10 @@ namespace FormationContinue.Data
                     .HasForeignKey(qc => qc.QuestionId)
                     .OnDelete(DeleteBehavior.NoAction);
             });
+
             modelBuilder.Entity<Enrollment>(entity =>
             {
                 entity.Property(e => e.Statut).HasMaxLength(20).IsRequired();
-
                 entity.HasIndex(e => new { e.UserId, e.CourseId }).IsUnique();
 
                 entity.HasOne(e => e.User)
@@ -194,10 +214,6 @@ namespace FormationContinue.Data
                     .HasForeignKey(p => p.EnrollmentId)
                     .OnDelete(DeleteBehavior.NoAction);
             });
-
-
-
-
         }
     }
 }

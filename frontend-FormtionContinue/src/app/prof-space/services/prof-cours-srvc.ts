@@ -1,10 +1,10 @@
-// src/app/prof-space/services/prof-cours-srvc.ts
+
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { ICours } from '../interfaces/icours';
-
+import { IInscription } from '../interfaces/iinscription';
 export interface CourseCreateDto {
   titre: string;
   description: string;
@@ -25,13 +25,15 @@ export interface CourseUpdateDto {
 export class ProfCoursSrvc {
   constructor(private http: HttpClient) {}
 
+  // ---------- Courses ----------
   getCourses(search?: string, categoryId?: number): Observable<ICours[]> {
     const params: string[] = [];
 
     const s = search?.trim();
     if (s) params.push(`search=${encodeURIComponent(s)}`);
 
-    if (categoryId !== undefined && categoryId !== null) params.push(`categoryId=${categoryId}`);
+    if (categoryId !== undefined && categoryId !== null)
+      params.push(`categoryId=${categoryId}`);
 
     const url =
       params.length > 0
@@ -59,7 +61,6 @@ export class ProfCoursSrvc {
     return this.http.post<void>(`${environment.apiUrl}/courses/${id}/attach-pdf`, fd);
   }
 
-  
   publishCourse(id: number): Observable<void> {
     return this.http.post<void>(`${environment.apiUrl}/courses/${id}/publish`, {});
   }
@@ -73,13 +74,24 @@ export class ProfCoursSrvc {
   }
 
   getPdfBlob(id: number): Observable<Blob> {
-    return this.http.get(`${environment.apiUrl}/courses/${id}/pdf`, { responseType: 'blob' });
+    return this.http.get(`${environment.apiUrl}/courses/${id}/pdf`, {
+      responseType: 'blob',
+    });
   }
 
- 
+  attachVideo(id: number, file: File): Observable<void> {
+    const fd = new FormData();
+    fd.append('video', file);
+    return this.http.post<void>(`${environment.apiUrl}/courses/${id}/attach-video`, fd);
+  }
 
+  getVideoBlob(id: number): Observable<Blob> {
+    return this.http.get(`${environment.apiUrl}/courses/${id}/video`, {
+      responseType: 'blob',
+    });
+  }
 
-  // ---- Co-teachers ----
+  // ---------- Co-teachers ----------
   getCoProfessors(courseId: number): Observable<any[]> {
     return this.http.get<any[]>(
       `${environment.apiUrl}/professor/courses/${courseId}/co-professors`
@@ -105,8 +117,13 @@ export class ProfCoursSrvc {
     );
   }
 
-  // ---- Enrollments ----
-  getEnrollments(statut?: string, search?: string): Observable<any[]> {
+  // ---------- Enrollments  ----------
+  getEnrollments(
+    statut?: string,
+    search?: string,
+    serviceId?: number,
+    statutId?: number
+  ): Observable<any[]> {
     const params: string[] = [];
 
     const st = statut?.trim();
@@ -115,31 +132,31 @@ export class ProfCoursSrvc {
     const s = search?.trim();
     if (s) params.push(`search=${encodeURIComponent(s)}`);
 
+    if (serviceId !== undefined && serviceId !== null)
+      params.push(`serviceId=${serviceId}`);
+
+    if (statutId !== undefined && statutId !== null)
+      params.push(`statutId=${statutId}`);
+
     const url =
       params.length > 0
         ? `${environment.apiUrl}/professor/enrollments?${params.join('&')}`
         : `${environment.apiUrl}/professor/enrollments`;
 
-    return this.http.get<any[]>(url);
+        return this.http.get<IInscription[]>(url);
   }
 
   acceptEnrollment(id: number): Observable<void> {
-    return this.http.post<void>(`${environment.apiUrl}/professor/enrollments/${id}/accept`, {});
+    return this.http.post<void>(
+      `${environment.apiUrl}/professor/enrollments/${id}/accept`,
+      {}
+    );
   }
 
   refuseEnrollment(id: number): Observable<void> {
-    return this.http.post<void>(`${environment.apiUrl}/professor/enrollments/${id}/refuse`, {});
+    return this.http.post<void>(
+      `${environment.apiUrl}/professor/enrollments/${id}/refuse`,
+      {}
+    );
   }
-  attachVideo(id: number, file: File) {
-    const fd = new FormData();
-    fd.append('video', file);
-    return this.http.post<void>(`${environment.apiUrl}/courses/${id}/attach-video`, fd);
-  }
-  
-  getVideoBlob(id: number) {
-    return this.http.get(`${environment.apiUrl}/courses/${id}/video`, {
-      responseType: 'blob',
-    });
-  }
-  
 }

@@ -36,6 +36,7 @@ namespace FormationContinue.Controllers
                 var s = statut.Trim().ToUpper();
                 q = q.Where(e => e.Statut.ToUpper() == s);
             }
+
             if (!string.IsNullOrWhiteSpace(search))
             {
                 var s = search.Trim().ToLower();
@@ -44,7 +45,6 @@ namespace FormationContinue.Controllers
                     e.User.FullName.ToLower().Contains(s) ||
                     e.User.Email.ToLower().Contains(s));
             }
-
 
             var list = await q
                 .OrderByDescending(e => e.DateDemande)
@@ -56,6 +56,10 @@ namespace FormationContinue.Controllers
                     UserId = e.UserId,
                     UserFullName = e.User.FullName,
                     UserEmail = e.User.Email,
+                    ServiceId = e.User.ServiceId,
+                    ServiceLibelle = e.User.Service.Libelle,
+                    StatutId = e.User.StatutId,
+                    StatutLibelle = e.User.Statut.Libelle,
                     Statut = e.Statut,
                     DateDemande = e.DateDemande,
                     DateDecision = e.DateDecision

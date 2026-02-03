@@ -53,6 +53,8 @@
             <tr>
               <th style="width: 28%">Nom</th>
               <th style="width: 34%">Email</th>
+              <th style="width: 14%">Service</th>
+              <th style="width: 14%">Statut</th>
               <th style="width: 14%">Rôle</th>
               <th style="width: 14%">Créé le</th>
               <th class="text-end" style="width: 10%">Actions</th>
@@ -77,6 +79,9 @@
                 <span class="name-cell">{{ u.fullName }}</span>
               </td>
               <td class="text-truncate">{{ u.email }}</td>
+              <td class="text-truncate">{{ u.serviceLibelle || '-' }}</td>
+<td class="text-truncate">{{ u.statutLibelle || '-' }}</td>
+
               <td>
                 <span
                   class="badge"
@@ -129,7 +134,32 @@
               <option value="USER">UTILISATEUR</option>
             </select>
           </div>
-  
+          <div class="col-md-6">
+            <label class="form-label">Service</label>
+            <select
+              class="form-select select-scroll"
+              [(ngModel)]="form.serviceId"
+            >
+              <option [ngValue]="null">—</option>
+              <option *ngFor="let s of services" [ngValue]="s.id">
+                {{ s.libelle }}
+              </option>
+            </select>
+          </div>
+          
+          <div class="col-md-6">
+            <label class="form-label">Statut</label>
+            <select
+              class="form-select select-scroll"
+              [(ngModel)]="form.statutId"
+            >
+              <option [ngValue]="null">—</option>
+              <option *ngFor="let s of statuts" [ngValue]="s.id">
+                {{ s.libelle }}
+              </option>
+            </select>
+          </div>
+          
           <div class="col-md-6">
             <label class="form-label">Nouveau mot de passe (optionnel)</label>
             <div class="input-group">

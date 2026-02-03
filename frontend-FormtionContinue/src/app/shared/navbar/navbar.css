@@ -31,8 +31,7 @@
   .navbar-tabs {
     display: flex;
     align-items: center;
-    gap: 10px;
-  
+    gap: 3px;
     flex: 1 1 auto;
     min-width: 0;
   
@@ -66,8 +65,8 @@
     background: rgba(255, 255, 255, 0.04);
   
     transition: background 0.15s ease, transform 0.2s ease-in-out;
-  
-    min-width: 130px;
+  width: auto;
+    min-width: 100px;
     flex: 0 0 auto;
   }
   

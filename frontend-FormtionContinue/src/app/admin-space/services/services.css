@@ -1,4 +1,4 @@
-.admin-users {
+.admin-services {
     padding: 0 12px;
   }
   
@@ -16,15 +16,7 @@
   }
   
   .search-box {
-    min-width: 320px;
-  }
-  
-  .role-box {
-    min-width: 210px;
-  }
-  .select-scroll {
-    max-height: 190px;
-    overflow-y: auto;
+    min-width: 360px;
   }
   
   .table-clean thead th,
@@ -60,26 +52,8 @@
     text-overflow: ellipsis;
   }
   
-  .text-truncate {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-  
-  .card-header .card-title {
-    font-size: 18px;
-    font-weight: 900;
-  }
-  
-  .card-table td,
-  .card-table th {
-    padding-top: 14px;
-    padding-bottom: 14px;
-  }
-  
-  .card-table th:last-child,
-  .card-table td:last-child {
-    white-space: nowrap;
+  .row-hover:hover td {
+    background: rgba(12, 166, 120, 0.08);
   }
   
   .table-clean tbody tr {
@@ -87,11 +61,24 @@
     transform-origin: center;
   }
   
-  .row-hover:hover td {
-    background: rgba(12, 166, 120, 0.08);
-  }
-  
   .table-clean tbody tr:hover {
     transform: scale(1.01);
+  }
+  
+  .modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.55);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 18px;
+    z-index: 9999;
+  }
+  
+  .modal-card {
+    width: 100%;
+    max-width: 720px;
+    border-radius: 14px;
   }
   

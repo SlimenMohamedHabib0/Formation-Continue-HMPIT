@@ -13,5 +13,11 @@ namespace FormationContinue.Dtos.Admin
 
         [Required, MinLength(8), MaxLength(64)]
         public string Password { get; set; } = null!;
+
+        [Required]
+        public int ServiceId { get; set; }
+
+        [Required]
+        public int StatutId { get; set; }
     }
 }

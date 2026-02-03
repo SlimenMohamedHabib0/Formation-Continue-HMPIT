@@ -26,6 +26,10 @@
     letter-spacing: 0.04em;
     color: #64748b;
   }
+  .select-scroll {
+    max-height: 190px;
+    overflow-y: auto;
+  }
   
   .table td {
     font-size: 15px;

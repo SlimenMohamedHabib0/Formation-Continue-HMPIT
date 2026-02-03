@@ -43,14 +43,58 @@
 
           <div class="mb-2">
             <label class="form-label">Mot de passe</label>
-            <input
-              type="password"
-              class="form-control"
-              name="password"
-              [(ngModel)]="model.password"
-              required
-            />
+          
+            <div class="input-group">
+              <input
+                [type]="showPassword ? 'text' : 'password'"
+                class="form-control"
+                name="password"
+                [(ngModel)]="model.password"
+                required
+              />
+          
+              <button
+                type="button"
+                class="btn btn-outline-secondary"
+                (click)="togglePassword()"
+                tabindex="-1"
+              >
+                <span *ngIf="!showPassword">Show Password</span>
+                <span *ngIf="showPassword">Hide Password</span>
+              </button>
+            </div>
           </div>
+          
+          <div class="mb-3">
+            <label class="form-label">Service</label>
+            <select
+              class="form-select scroll-select"
+              [(ngModel)]="model.serviceId"
+              name="serviceId"
+              required
+            >
+              <option [ngValue]="0" disabled>Sélectionner un service</option>
+              <option *ngFor="let s of services" [ngValue]="s.id">
+                {{ s.libelle }}
+              </option>
+            </select>
+          </div>
+          
+          <div class="mb-3">
+            <label class="form-label">Statut</label>
+            <select
+              class="form-select scroll-select"
+              [(ngModel)]="model.statutId"
+              name="statutId"
+              required
+            >
+              <option [ngValue]="0" disabled>Sélectionner un statut</option>
+              <option *ngFor="let s of statuts" [ngValue]="s.id">
+                {{ s.libelle }}
+              </option>
+            </select>
+          </div>
+          
 
           <div class="form-footer mt-4">
             <button class="btn btn-primary w-100" type="submit" [disabled]="loading">

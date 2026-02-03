@@ -14,6 +14,14 @@ export interface CountItemDto {
   label: string;
   count: number;
 }
+export interface IService {
+  id: number;
+  libelle: string;
+}
+export interface IStatut {
+  id: number;
+  libelle: string;
+}
 
 export interface AdminDashboardDto {
   nbUsers: number;
@@ -39,7 +47,10 @@ export interface AdminDashboardDto {
   topCoursesByEnrollments: CountItemDto[];
   topCategoriesByCourses: CountItemDto[];
   topCategoriesByEnrollments: CountItemDto[];
+  topServicesByEnrollments: CountItemDto[];
+  topStatutsByEnrollments: CountItemDto[];
 }
+
 
 
 export interface CreateProfessorDto {
@@ -266,6 +277,47 @@ export class AdminSrvc {
       `${environment.apiUrl}/categories/${id}`
     );
   }
+  getServices(search?: string): Observable<IService[]> {
+    const s = search?.trim();
+    const url = s
+      ? `${environment.apiUrl}/admin/services?search=${encodeURIComponent(s)}`
+      : `${environment.apiUrl}/admin/services`;
+    return this.http.get<IService[]>(url);
+  }
+  
+  createService(payload: { libelle: string }): Observable<IService> {
+    return this.http.post<IService>(`${environment.apiUrl}/admin/services`, payload);
+  }
+  
+  updateService(id: number, payload: { libelle: string }): Observable<void> {
+    return this.http.put<void>(`${environment.apiUrl}/admin/services/${id}`, payload);
+  }
+  
+  deleteService(id: number): Observable<void> {
+    return this.http.delete<void>(`${environment.apiUrl}/admin/services/${id}`);
+  }
+  
+  getStatuts(search?: string) {
+    const s = search?.trim();
+    const url = s
+      ? `${environment.apiUrl}/admin/statuts?search=${encodeURIComponent(s)}`
+      : `${environment.apiUrl}/admin/statuts`;
+  
+    return this.http.get<IStatut[]>(url);
+  }
+  
+  createStatut(payload: { libelle: string }) {
+    return this.http.post<IStatut>(`${environment.apiUrl}/admin/statuts`, payload);
+  }
+  
+  updateStatut(id: number, payload: { libelle: string }) {
+    return this.http.put<void>(`${environment.apiUrl}/admin/statuts/${id}`, payload);
+  }
+  
+  deleteStatut(id: number) {
+    return this.http.delete<void>(`${environment.apiUrl}/admin/statuts/${id}`);
+  }
+  
   getProfessorDashboard(professorId: number): Observable<ProfessorDashboardDto> {
     return this.http.get<ProfessorDashboardDto>(
       `${environment.apiUrl}/admin/professors/${professorId}/dashboard`
