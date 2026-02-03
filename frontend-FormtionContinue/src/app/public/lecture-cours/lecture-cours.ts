@@ -1,7 +1,8 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, NavigationEnd } from '@angular/router';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
+import { filter, Subscription } from 'rxjs';
 import { PublicSrvc } from '../public-srvc';
 
 type CourseDetails = {
@@ -36,6 +37,7 @@ export class LectureCours implements OnInit, OnDestroy {
 
   videoUrl: SafeResourceUrl | null = null;
   private videoObjectUrl: string | null = null;
+  private navSub?: Subscription;
 
   completed = false;
 
@@ -46,7 +48,8 @@ export class LectureCours implements OnInit, OnDestroy {
     private route: ActivatedRoute,
     private router: Router,
     private srvc: PublicSrvc,
-    private sanitizer: DomSanitizer
+    private sanitizer: DomSanitizer,
+    
   ) {}
 
   ngOnInit(): void {
@@ -60,11 +63,21 @@ export class LectureCours implements OnInit, OnDestroy {
     }
 
     this.loadAll();
+    this.navSub = this.router.events
+  .pipe(filter((e): e is NavigationEnd => e instanceof NavigationEnd))
+  .subscribe(() => {
+    if (this.courseId) {
+      this.loadProgress();
+    }
+  });
+
   }
 
   ngOnDestroy(): void {
     if (this.pdfObjectUrl) URL.revokeObjectURL(this.pdfObjectUrl);
     if (this.videoObjectUrl) URL.revokeObjectURL(this.videoObjectUrl);
+    this.navSub?.unsubscribe();
+
   }
 
   back(): void {
@@ -122,16 +135,17 @@ export class LectureCours implements OnInit, OnDestroy {
 
   private loadProgress(): void {
     if (!this.courseId) return;
-
+  
     this.srvc.getProgress(this.courseId).subscribe({
       next: (p: any) => {
-        this.completed = !!p?.dateCompletion;
+        this.completed = !!p?.dateCompletion; 
       },
       error: () => {
         this.completed = false;
       },
     });
   }
+  
 
   private loadPdf(): void {
     this.srvc.getCoursePdfBlob(this.courseId!).subscribe({

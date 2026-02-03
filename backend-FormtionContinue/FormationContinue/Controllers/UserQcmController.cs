@@ -67,9 +67,10 @@ namespace FormationContinue.Controllers
 
                 if (lastAttempt.StatutTentative == "ECHOUE")
                 {
-                    if (progress.DateCompletion <= lastAttempt.DateTentative)
+                    if (progress.DateCompletion == null || progress.DateCompletion <= lastAttempt.DateTentative)
                         return BadRequest("You must re-read and complete the course before retrying the test.");
                 }
+
             }
 
             var questionIds = await _context.CourseQuestions
@@ -118,7 +119,6 @@ namespace FormationContinue.Controllers
             if (userIdStr == null || !int.TryParse(userIdStr, out var userId))
                 return Unauthorized();
 
-            // ✅ ORACLE FIX: no AnyAsync
             var courseCount = await _context.Courses
                 .AsNoTracking()
                 .CountAsync(c => c.Id == courseId && c.Etat == "PUBLISHED");
@@ -157,9 +157,10 @@ namespace FormationContinue.Controllers
 
                 if (lastAttempt.StatutTentative == "ECHOUE")
                 {
-                    if (progress.DateCompletion <= lastAttempt.DateTentative)
+                    if (progress.DateCompletion == null || progress.DateCompletion <= lastAttempt.DateTentative)
                         return BadRequest("You must re-read and complete the course before retrying the test.");
                 }
+
             }
 
             var questionIds = await _context.CourseQuestions
@@ -241,7 +242,15 @@ namespace FormationContinue.Controllers
             attempt.NoteSur20 = note;
             attempt.StatutTentative = (note >= 10) ? "REUSSI" : "ECHOUE";
 
+            if (attempt.StatutTentative == "ECHOUE")
+            {
+                progress.DateCompletion = null;
+                progress.DernierePageAtteinte = 0;
+
+            }
+
             await _context.SaveChangesAsync();
+
 
             return Ok(new UserQcmSubmitResultDto
             {
