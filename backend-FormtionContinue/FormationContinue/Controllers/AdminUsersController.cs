@@ -91,11 +91,11 @@ namespace FormationContinue.Controllers
             if (user == null)
                 return NotFound();
 
-            var newRole = dto.Role.Trim().ToUpper();
+            var newRole = (dto.Role ?? "").Trim().ToUpper();
             if (newRole != "ADMIN" && newRole != "PROFESSOR" && newRole != "USER")
                 return BadRequest("Role invalide.");
 
-            var email = dto.Email.Trim().ToLower();
+            var email = (dto.Email ?? "").Trim().ToLower();
             var emailExists = await _context.Users.CountAsync(u => u.Id != id && u.Email.ToLower() == email) > 0;
             if (emailExists)
                 return BadRequest("Email déjà utilisé.");
@@ -116,8 +116,8 @@ namespace FormationContinue.Controllers
             if (!statutExists)
                 return BadRequest("Statut introuvable.");
 
-            user.FullName = dto.FullName.Trim();
-            user.Email = dto.Email.Trim();
+            user.FullName = (dto.FullName ?? "").Trim();
+            user.Email = (dto.Email ?? "").Trim();
             user.Role = newRole;
             user.ServiceId = dto.ServiceId;
             user.StatutId = dto.StatutId;
@@ -130,18 +130,23 @@ namespace FormationContinue.Controllers
 
             await _context.SaveChangesAsync();
 
-            return Ok(new AdminUserResponseDto
-            {
-                Id = user.Id,
-                FullName = user.FullName,
-                Email = user.Email,
-                Role = user.Role,
-                CreatedAt = user.CreatedAt,
-                ServiceId = user.ServiceId,
-                ServiceLibelle = user.Service.Libelle,
-                StatutId = user.StatutId,
-                StatutLibelle = user.Statut.Libelle
-            });
+            var res = await _context.Users.AsNoTracking()
+                .Where(u => u.Id == id)
+                .Select(u => new AdminUserResponseDto
+                {
+                    Id = u.Id,
+                    FullName = u.FullName,
+                    Email = u.Email,
+                    Role = u.Role,
+                    CreatedAt = u.CreatedAt,
+                    ServiceId = u.ServiceId,
+                    ServiceLibelle = u.Service.Libelle,
+                    StatutId = u.StatutId,
+                    StatutLibelle = u.Statut.Libelle
+                })
+                .FirstAsync();
+
+            return Ok(res);
         }
     }
 }

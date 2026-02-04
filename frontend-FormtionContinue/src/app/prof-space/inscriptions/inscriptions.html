@@ -11,27 +11,7 @@
           [(ngModel)]="search"
           (ngModelChange)="load()"
         />
-  <select
-  class="form-select select-scroll"
-  [(ngModel)]="serviceId"
-  (change)="load()"
->
-  <option [ngValue]="null">Tous les services</option>
-  <option *ngFor="let s of services" [ngValue]="s.id">
-    {{ s.libelle }}
-  </option>
-</select>
-
-<select
-  class="form-select select-scroll"
-  [(ngModel)]="statutId"
-  (change)="load()"
->
-  <option [ngValue]="null">Tous les statuts</option>
-  <option *ngFor="let s of statuts" [ngValue]="s.id">
-    {{ s.libelle }}
-  </option>
-</select>
+ 
 
         <select
           class="form-select status-box"
